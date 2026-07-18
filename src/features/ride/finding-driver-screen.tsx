@@ -24,7 +24,7 @@ import { SearchingBar } from './components/searching-bar';
 const SEARCH_STEPS = ['Searching for drivers', 'Finding best match', 'Driver on the way', 'Arriving soon'];
 
 /** How long the mock search runs before a driver is assigned. */
-const SEARCH_DURATION_MS = 5000;
+const SEARCH_DURATION_MS = 60000;
 
 export function FindingDriverScreenView() {
   const theme = useTheme();
