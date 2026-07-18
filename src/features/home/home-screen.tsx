@@ -9,14 +9,14 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { useState } from 'react';
+import { Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { LogoMark } from '@/components/brand/logo-mark';
 import { RideMap } from '@/components/map/ride-map';
 import { Text } from '@/components/ui/text';
 import {
-  CURRENT_PICKUP,
   EXPLORE_CATEGORIES,
   NEARBY_VEHICLES,
   RECENT_SEARCHES,
@@ -37,8 +37,13 @@ export function HomeScreenView() {
   const insets = useSafeAreaInsets();
   const { height } = useWindowDimensions();
 
+  const pickup = useRideStore((s) => s.pickup);
+  const destination = useRideStore((s) => s.destination);
   const setDestination = useRideStore((s) => s.setDestination);
   const setStage = useRideStore((s) => s.setStage);
+
+  // Recent searches are local so "Clear All" can empty them in-session.
+  const [recents, setRecents] = useState<NamedPlace[]>(RECENT_SEARCHES);
 
   const chooseDestination = (place: NamedPlace) => {
     setDestination(place);
@@ -74,15 +79,20 @@ export function HomeScreenView() {
         {/* Where-to card */}
         <View style={styles.section}>
           <WhereToCard
-            pickup={CURRENT_PICKUP}
-            onPressDestination={() => router.push('/select-destination')}
+            pickup={pickup}
+            destination={destination}
+            onPressPickup={() => router.push('/select-destination?field=pickup')}
+            onPressDestination={() => {
+              if (destination) router.push('/choose-ride');
+              else router.push('/select-destination');
+            }}
             onPressAddStop={() => router.push('/select-destination')}
           />
         </View>
 
         {/* Map */}
         <View style={[styles.mapWrap, { height: mapHeight, borderRadius: theme.radius.xl }]}>
-          <RideMap pickup={CURRENT_PICKUP.coordinate} nearbyVehicles={NEARBY_VEHICLES}>
+          <RideMap pickup={pickup.coordinate} destination={destination?.coordinate} nearbyVehicles={NEARBY_VEHICLES}>
             <View style={styles.mapControls}>
               <MapControlButton icon="locate" onPress={() => {}} />
             </View>
@@ -96,7 +106,11 @@ export function HomeScreenView() {
 
         {/* Saved Places */}
         <View style={styles.section}>
-          <SectionHeader title="Saved Places" actionLabel="View All" onAction={() => {}} />
+          <SectionHeader
+            title="Saved Places"
+            actionLabel="View All"
+            onAction={() => router.push('/select-destination')}
+          />
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -109,17 +123,24 @@ export function HomeScreenView() {
         </View>
 
         {/* Recent Searches */}
-        <View style={styles.section}>
-          <SectionHeader title="Recent Searches" actionLabel="Clear All" destructive onAction={() => {}} />
-          <View style={[styles.list, { borderColor: theme.colors.border }]}>
-            {RECENT_SEARCHES.map((p, i) => (
-              <View key={p.id}>
-                {i > 0 ? <View style={[styles.divider, { backgroundColor: theme.colors.border }]} /> : null}
-                <PlaceRow place={p} onPress={() => chooseDestination(p)} />
-              </View>
-            ))}
+        {recents.length > 0 ? (
+          <View style={styles.section}>
+            <SectionHeader
+              title="Recent Searches"
+              actionLabel="Clear All"
+              destructive
+              onAction={() => setRecents([])}
+            />
+            <View style={[styles.list, { borderColor: theme.colors.border }]}>
+              {recents.map((p, i) => (
+                <View key={p.id}>
+                  {i > 0 ? <View style={[styles.divider, { backgroundColor: theme.colors.border }]} /> : null}
+                  <PlaceRow place={p} onPress={() => chooseDestination(p)} />
+                </View>
+              ))}
+            </View>
           </View>
-        </View>
+        ) : null}
 
         {/* Explore Nearby */}
         <View style={styles.section}>
@@ -128,14 +149,19 @@ export function HomeScreenView() {
           </Text>
           <View style={styles.exploreRow}>
             {EXPLORE_CATEGORIES.map((c) => (
-              <View key={c.id} style={styles.exploreItem}>
+              <Pressable
+                key={c.id}
+                onPress={() => router.push('/select-destination')}
+                accessibilityRole="button"
+                accessibilityLabel={c.label}
+                style={styles.exploreItem}>
                 <View style={[styles.exploreCircle, { backgroundColor: `${c.color}22` }]}>
                   <Ionicons name={c.icon as keyof typeof Ionicons.glyphMap} size={22} color={c.color} />
                 </View>
                 <Text variant="caption" tone="secondary" numberOfLines={1}>
                   {c.label}
                 </Text>
-              </View>
+              </Pressable>
             ))}
           </View>
         </View>

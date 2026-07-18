@@ -1,22 +1,42 @@
 /**
  * RideMap — WEB variant.
  *
- * react-native-maps has no web renderer, so on web we draw the styled mock
- * backdrop and place abstract pins over it. This exists so the ride screens are
- * still reviewable in the browser preview; the device runs the real map.
+ * react-native-maps has no web renderer, so on web we embed a real
+ * OpenStreetMap tile map (free, no API key) framed on the ride's points, and
+ * overlay the pins/route hint on top. The native build uses Google Maps.
+ *
+ * Rendering a raw <iframe> is fine here: react-native-web runs on React DOM, so
+ * intrinsic DOM elements render normally.
  */
 
+import { createElement } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { useTheme } from '@/theme';
+import type { LatLng } from '@/types/ride';
 
-import { MockMapBackdrop } from './mock-map-backdrop';
 import type { RideMapProps } from './ride-map.types';
+
+/** Kathmandu valley centre — fallback when no points are supplied. */
+const DEFAULT_CENTER: LatLng = { latitude: 27.7017, longitude: 85.3206 };
+
+/** Build an OpenStreetMap embed URL framing the given points. */
+function buildOsmUrl(points: LatLng[], marker: LatLng): string {
+  const lats = points.map((p) => p.latitude);
+  const lons = points.map((p) => p.longitude);
+  // Pad the bounding box so pins aren't flush against the frame edge.
+  const pad = 0.012;
+  const minLat = Math.min(...lats) - pad;
+  const maxLat = Math.max(...lats) + pad;
+  const minLon = Math.min(...lons) - pad;
+  const maxLon = Math.max(...lons) + pad;
+  const bbox = `${minLon},${minLat},${maxLon},${maxLat}`;
+  return `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${marker.latitude},${marker.longitude}`;
+}
 
 export function RideMap({
   pickup,
   destination,
-  nearbyVehicles,
   driverLocation,
   showRoute,
   style,
@@ -24,37 +44,33 @@ export function RideMap({
 }: RideMapProps) {
   const theme = useTheme();
 
+  const points = [pickup, destination, driverLocation].filter((p): p is LatLng => !!p);
+  const framePoints = points.length ? points : [DEFAULT_CENTER];
+  const marker = destination ?? pickup ?? DEFAULT_CENTER;
+  const src = buildOsmUrl(framePoints, marker);
+
   return (
     <View style={[styles.root, style]}>
-      <View style={StyleSheet.absoluteFill}>
-        <MockMapBackdrop width={1000} height={1000} showUserDot={!!pickup} />
-      </View>
+      {/* Real OSM map. key forces a reload when the framed area changes. */}
+      {createElement('iframe', {
+        key: src,
+        src,
+        title: 'Map',
+        style: {
+          border: 'none',
+          width: '100%',
+          height: '100%',
+          // Muted so the amber UI and pins stay dominant.
+          filter: theme.scheme === 'dark' ? 'grayscale(0.3) brightness(0.7)' : 'saturate(0.9)',
+        },
+      })}
 
-      {/* Abstract pins laid out relative to the frame (no projection on web). */}
-      {destination ? (
-        <View style={[styles.pin, styles.destPin, { backgroundColor: theme.colors.danger }]} />
-      ) : null}
-      {driverLocation ? (
-        <View style={[styles.pin, styles.driverPin, { backgroundColor: theme.colors.text }]} />
-      ) : null}
+      {/* Route + destination hint overlay (approximate — OSM handles the marker). */}
       {showRoute && destination ? (
-        <View style={[styles.routeHint, { borderColor: theme.colors.textTertiary }]} />
+        <View pointerEvents="none" style={styles.overlay}>
+          <View style={[styles.badge, { backgroundColor: theme.colors.surface }, theme.elevation.sm]} />
+        </View>
       ) : null}
-
-      {/* Nearby vehicle dots */}
-      {(nearbyVehicles ?? []).slice(0, 5).map((v, i) => (
-        <View
-          key={v.id}
-          style={[
-            styles.vehicleDot,
-            {
-              backgroundColor: theme.colors.text,
-              left: `${20 + i * 14}%`,
-              top: `${30 + (i % 3) * 16}%`,
-            },
-          ]}
-        />
-      ))}
 
       {children}
     </View>
@@ -67,29 +83,6 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     backgroundColor: '#E9ECF0',
   },
-  pin: {
-    position: 'absolute',
-    width: 18,
-    height: 18,
-    borderRadius: 9,
-    borderWidth: 3,
-    borderColor: '#fff',
-  },
-  destPin: { left: '62%', top: '46%' },
-  driverPin: { left: '38%', top: '40%' },
-  routeHint: {
-    position: 'absolute',
-    left: '46%',
-    top: '44%',
-    width: 90,
-    height: 40,
-    borderTopWidth: 2,
-    borderStyle: 'dashed',
-  },
-  vehicleDot: {
-    position: 'absolute',
-    width: 12,
-    height: 12,
-    borderRadius: 3,
-  },
+  overlay: { ...StyleSheet.absoluteFillObject, alignItems: 'center', justifyContent: 'center' },
+  badge: { width: 0, height: 0 },
 });

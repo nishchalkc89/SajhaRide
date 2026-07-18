@@ -1,13 +1,15 @@
 /**
- * Screen 10 — Select Destination.
+ * Screen 10 — Select Destination / Pickup.
  *
- * A search field over the place catalogue with live filtering, plus saved
- * places and recent searches as shortcuts. Picking any result seeds the ride
- * store's destination and advances to ride selection.
+ * A keyword search over the Nepal-wide place catalogue, plus saved places and
+ * recent searches as shortcuts. The `field` param decides whether a pick sets
+ * the pickup or the destination:
+ *   - destination (default) → seeds destination, advances to ride selection.
+ *   - pickup → updates pickup, returns to the previous screen.
  */
 
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
@@ -15,7 +17,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { Text } from '@/components/ui/text';
-import { PLACE_CATALOGUE, RECENT_SEARCHES, SAVED_PLACES } from '@/services/mock-data';
+import { RECENT_SEARCHES, SAVED_PLACES } from '@/services/mock-data';
+import { searchPlaces } from '@/services/nepal-places';
 import { useRideStore } from '@/store/ride-store';
 import { noWebOutline, useTheme } from '@/theme';
 import type { NamedPlace } from '@/types/ride';
@@ -27,19 +30,24 @@ export function SelectDestinationScreenView() {
   const theme = useTheme();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { field } = useLocalSearchParams<{ field?: string }>();
+
+  const isPickup = field === 'pickup';
 
   const setDestination = useRideStore((s) => s.setDestination);
+  const setPickup = useRideStore((s) => s.setPickup);
   const [query, setQuery] = useState('');
 
-  const results = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return [];
-    return PLACE_CATALOGUE.filter((p) => p.title.toLowerCase().includes(q));
-  }, [query]);
+  const results = useMemo(() => searchPlaces(query), [query]);
 
   const choose = (place: NamedPlace) => {
-    setDestination(place);
-    router.push('/choose-ride');
+    if (isPickup) {
+      setPickup(place);
+      router.back();
+    } else {
+      setDestination(place);
+      router.push('/choose-ride');
+    }
   };
 
   const searching = query.trim().length > 0;
@@ -47,7 +55,7 @@ export function SelectDestinationScreenView() {
   return (
     <View style={[styles.root, { backgroundColor: theme.colors.surface, paddingTop: insets.top }]}>
       <StatusBar style={theme.scheme === 'dark' ? 'light' : 'dark'} />
-      <ScreenHeader title="Select Destination" />
+      <ScreenHeader title={isPickup ? 'Set Pickup Location' : 'Select Destination'} />
 
       {/* Search field */}
       <View style={[styles.searchWrap, { paddingHorizontal: theme.screenPadding }]}>
@@ -60,7 +68,7 @@ export function SelectDestinationScreenView() {
           <TextInput
             value={query}
             onChangeText={setQuery}
-            placeholder="Search destination"
+            placeholder={isPickup ? 'Search pickup location' : 'Search destination'}
             placeholderTextColor={theme.colors.textTertiary}
             autoFocus
             style={[styles.searchInput, theme.typography.bodyLg, noWebOutline, { color: theme.colors.text }]}
