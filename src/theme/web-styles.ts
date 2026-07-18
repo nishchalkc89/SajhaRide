@@ -11,4 +11,4 @@ import { Platform, type TextStyle } from 'react-native';
 
 /** Spread onto any TextInput style to remove the browser focus outline on web. */
 export const noWebOutline: TextStyle =
-  Platform.OS === 'web' ? ({ outlineStyle: 'none', outlineWidth: 0 } as TextStyle) : {};
+  Platform.OS === 'web' ? ({ outlineStyle: 'none', outlineWidth: 0 } as unknown as TextStyle) : {};

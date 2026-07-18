@@ -19,10 +19,12 @@ import { NEARBY_VEHICLES } from '@/services/mock-data';
 import { useRideStore } from '@/store/ride-store';
 import { useTheme } from '@/theme';
 
+import { SearchingBar } from './components/searching-bar';
+
 const SEARCH_STEPS = ['Searching for drivers', 'Finding best match', 'Driver on the way', 'Arriving soon'];
 
 /** How long the mock search runs before a driver is assigned. */
-const SEARCH_DURATION_MS = 3200;
+const SEARCH_DURATION_MS = 5000;
 
 export function FindingDriverScreenView() {
   const theme = useTheme();
@@ -101,6 +103,11 @@ export function FindingDriverScreenView() {
           <Text variant="bodySm" tone="secondary" align="center">
             Please wait a moment…
           </Text>
+
+          {/* Sweeping searching bar */}
+          <View style={styles.searchingBar}>
+            <SearchingBar />
+          </View>
 
           {/* Progress steps */}
           <View style={styles.steps}>
@@ -203,6 +210,7 @@ const styles = StyleSheet.create({
   sheet: { maxHeight: '58%', paddingTop: 8, paddingHorizontal: 20 },
   handle: { width: 40, height: 4, borderRadius: 2, alignSelf: 'center', marginBottom: 12 },
   title: { marginTop: 4 },
+  searchingBar: { marginTop: 20, paddingHorizontal: 8 },
   steps: {
     flexDirection: 'row',
     justifyContent: 'space-between',

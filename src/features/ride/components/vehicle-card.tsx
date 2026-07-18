@@ -5,7 +5,7 @@
  */
 
 import { Ionicons } from '@expo/vector-icons';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Image, Pressable, StyleSheet, View } from 'react-native';
 
 import { Text } from '@/components/ui/text';
 import { useHaptics } from '@/hooks/use-haptics';
@@ -43,7 +43,7 @@ export function VehicleCard({
         },
       ]}>
       <View style={[styles.iconWrap, { backgroundColor: theme.colors.surfaceMuted }]}>
-        <Ionicons name={vehicle.icon as keyof typeof Ionicons.glyphMap} size={26} color={theme.colors.text} />
+        <Image source={vehicle.image} style={styles.vehicleImage} resizeMode="contain" />
       </View>
 
       <View style={styles.body}>
@@ -101,11 +101,16 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   iconWrap: {
-    width: 48,
-    height: 48,
+    width: 56,
+    height: 56,
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  vehicleImage: {
+    width: 52,
+    height: 52,
   },
   body: { flex: 1, gap: 2 },
   nameRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },

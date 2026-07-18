@@ -93,6 +93,7 @@ export const VEHICLES: Vehicle[] = [
     etaMinutes: 2,
     capacity: 1,
     icon: 'bicycle',
+    image: require('../../assets/images/vehicles/bike.png'),
     recommended: true,
   },
   {
@@ -103,6 +104,7 @@ export const VEHICLES: Vehicle[] = [
     etaMinutes: 3,
     capacity: 3,
     icon: 'car-sport',
+    image: require('../../assets/images/vehicles/auto.png'),
   },
   {
     id: 'car',
@@ -112,6 +114,7 @@ export const VEHICLES: Vehicle[] = [
     etaMinutes: 4,
     capacity: 4,
     icon: 'car',
+    image: require('../../assets/images/vehicles/car.png'),
   },
   {
     id: 'suv',
@@ -121,6 +124,7 @@ export const VEHICLES: Vehicle[] = [
     etaMinutes: 6,
     capacity: 6,
     icon: 'car',
+    image: require('../../assets/images/vehicles/suv.png'),
   },
   {
     id: 'premium',
@@ -130,6 +134,7 @@ export const VEHICLES: Vehicle[] = [
     etaMinutes: 7,
     capacity: 4,
     icon: 'car',
+    image: require('../../assets/images/vehicles/premium.png'),
   },
 ];
 

@@ -27,8 +27,10 @@ export type Vehicle = {
   fare: number;
   etaMinutes: number;
   capacity: number;
-  /** Ionicons glyph name representing the vehicle. */
+  /** Ionicons glyph name representing the vehicle (fallback / map marker). */
   icon: string;
+  /** 3D render of the vehicle shown in the ride picker. */
+  image: import('react-native').ImageSourcePropType;
   /** Marks the "Recommended / Best for you" option. */
   recommended?: boolean;
 };
