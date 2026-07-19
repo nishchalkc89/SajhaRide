@@ -111,16 +111,25 @@ export function CaptainHomeScreenView() {
               title="Captain"
               onBack={() => router.replace('/(tabs)/home')}
               right={
-                <View style={[styles.statusPill, { backgroundColor: theme.colors.surface }, theme.elevation.sm]}>
-                  <View
-                    style={[
-                      styles.statusDot,
-                      { backgroundColor: isOnline ? theme.colors.success : theme.colors.textTertiary },
-                    ]}
-                  />
-                  <Text variant="caption" tone="secondary">
-                    {isOnline ? 'Online' : 'Offline'}
-                  </Text>
+                <View style={styles.headerRight}>
+                  <View style={[styles.statusPill, { backgroundColor: theme.colors.surface }, theme.elevation.sm]}>
+                    <View
+                      style={[
+                        styles.statusDot,
+                        { backgroundColor: isOnline ? theme.colors.success : theme.colors.textTertiary },
+                      ]}
+                    />
+                    <Text variant="caption" tone="secondary">
+                      {isOnline ? 'Online' : 'Offline'}
+                    </Text>
+                  </View>
+                  <Pressable
+                    onPress={() => router.push('/captain/profile')}
+                    accessibilityRole="button"
+                    accessibilityLabel="Captain profile"
+                    style={[styles.profileBtn, { backgroundColor: theme.colors.surface }, theme.elevation.sm]}>
+                    <Ionicons name="person" size={18} color={theme.colors.text} />
+                  </Pressable>
                 </View>
               }
             />
@@ -390,6 +399,8 @@ const styles = StyleSheet.create({
     borderRadius: 999,
   },
   statusDot: { width: 8, height: 8, borderRadius: 4 },
+  headerRight: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  profileBtn: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
   sheet: { maxHeight: '64%', paddingTop: 8 },
   handle: { width: 40, height: 4, borderRadius: 2, alignSelf: 'center', marginBottom: 12 },
   earningsRow: {
