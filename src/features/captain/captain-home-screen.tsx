@@ -241,7 +241,10 @@ export function CaptainHomeScreenView() {
 
               {stage === 'riding' && request ? (
                 <View style={styles.tripBlock}>
-                  <Text variant="h3">Ride in progress</Text>
+                  <View style={styles.tripHead}>
+                    <Text variant="h3">Ride in progress</Text>
+                    <ContactButtons name={request.riderName} theme={theme} onNav={(p) => router.push(p)} />
+                  </View>
                   <ActiveRoute request={request} theme={theme} />
                 </View>
               ) : null}
