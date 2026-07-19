@@ -202,9 +202,12 @@ export function CaptainHomeScreenView() {
 
               {(stage === 'accepted' || stage === 'arrived') && request ? (
                 <View style={styles.tripBlock}>
-                  <Text variant="h3">
-                    {stage === 'accepted' ? 'Head to pickup' : 'Verify PIN to start'}
-                  </Text>
+                  <View style={styles.tripHead}>
+                    <Text variant="h3">
+                      {stage === 'accepted' ? 'Head to pickup' : 'Verify PIN to start'}
+                    </Text>
+                    <ContactButtons name={request.riderName} theme={theme} onNav={(p) => router.push(p)} />
+                  </View>
                   <ActiveRoute request={request} theme={theme} />
 
                   {stage === 'arrived' ? (

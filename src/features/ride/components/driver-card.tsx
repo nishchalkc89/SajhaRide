@@ -5,17 +5,19 @@
  */
 
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Text } from '@/components/ui/text';
 import { useHaptics } from '@/hooks/use-haptics';
-import { toast } from '@/store/toast-store';
 import { useTheme } from '@/theme';
 import type { Driver } from '@/types/ride';
 
 export function DriverCard({ driver }: { driver: Driver }) {
   const theme = useTheme();
   const haptic = useHaptics();
+  const router = useRouter();
+  const contact = encodeURIComponent(driver.name);
 
   return (
     <View style={styles.row}>
@@ -49,7 +51,7 @@ export function DriverCard({ driver }: { driver: Driver }) {
         <Pressable
           onPress={() => {
             haptic('light');
-            toast(`Calling ${driver.name}…`);
+            router.push(`/call?name=${contact}`);
           }}
           accessibilityRole="button"
           accessibilityLabel="Call driver"
@@ -59,7 +61,7 @@ export function DriverCard({ driver }: { driver: Driver }) {
         <Pressable
           onPress={() => {
             haptic('light');
-            toast('Opening chat with your driver…');
+            router.push(`/chat?name=${contact}`);
           }}
           accessibilityRole="button"
           accessibilityLabel="Message driver"
