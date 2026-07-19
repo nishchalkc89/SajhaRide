@@ -17,7 +17,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { useHaptics } from '@/hooks/use-haptics';
+import { useCaptainStore } from '@/store/captain-store';
 import { useRideStore } from '@/store/ride-store';
+import { toast } from '@/store/toast-store';
 import { CAN_ANIMATE, entranceFrom, useTheme } from '@/theme';
 
 import { StarRating } from './components/star-rating';
@@ -36,6 +38,17 @@ export function RideCompletedScreenView() {
 
   const [tip, setTip] = useState<number | null>(null);
   const [stars, setStars] = useState(0);
+  const [paid, setPaid] = useState(false);
+
+  // Simulate scanning the captain's QR: the fare (+ any tip) lands in the
+  // captain's wallet. On a real device this is the phone's bank/UPI scanner.
+  const payViaQr = () => {
+    const total = vehicle.fare + (tip ?? 0);
+    useCaptainStore.getState().creditWallet(total);
+    setPaid(true);
+    haptic('success');
+    toast(`NPR ${total} paid to captain via QR`, 'success');
+  };
 
   // Success tick pops in on mount.
   const scale = useSharedValue(entranceFrom(0.4, 1));
@@ -80,19 +93,36 @@ export function RideCompletedScreenView() {
         <View style={[styles.card, { backgroundColor: theme.colors.surface }, theme.elevation.sm]}>
           <View style={styles.fareRow}>
             <Text variant="h2">NPR {vehicle.fare}</Text>
-            <View style={[styles.paidBadge, { backgroundColor: theme.colors.successSubtle }]}>
-              <Ionicons name="checkmark-circle" size={14} color={theme.colors.success} />
-              <Text variant="caption" tone="success">
-                Paid
+            {paid ? (
+              <View style={[styles.paidBadge, { backgroundColor: theme.colors.successSubtle }]}>
+                <Ionicons name="checkmark-circle" size={14} color={theme.colors.success} />
+                <Text variant="caption" tone="success">
+                  Paid
+                </Text>
+              </View>
+            ) : (
+              <View style={[styles.paidBadge, { backgroundColor: theme.colors.dangerSubtle }]}>
+                <Text variant="caption" tone="danger">
+                  Payment due
+                </Text>
+              </View>
+            )}
+          </View>
+          {paid ? (
+            <View style={styles.payMethod}>
+              <Ionicons name="qr-code-outline" size={16} color={theme.colors.success} />
+              <Text variant="bodySm" tone="secondary">
+                Paid via QR to captain&apos;s wallet
               </Text>
             </View>
-          </View>
-          <View style={styles.payMethod}>
-            <Ionicons name="cash-outline" size={16} color={theme.colors.textSecondary} />
-            <Text variant="bodySm" tone="secondary">
-              Paid with Cash
-            </Text>
-          </View>
+          ) : (
+            <Button
+              label={`Scan & Pay NPR ${vehicle.fare}`}
+              onPress={payViaQr}
+              leadingIcon={<Ionicons name="qr-code" size={18} color={theme.colors.onPrimary} />}
+              style={styles.payBtn}
+            />
+          )}
         </View>
 
         {/* Driver + tip */}
@@ -183,6 +213,7 @@ const styles = StyleSheet.create({
   fareRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   paidBadge: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999 },
   payMethod: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 8 },
+  payBtn: { marginTop: 14 },
   driverRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   avatar: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
   flex1: { flex: 1 },

@@ -16,6 +16,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { RideMap } from '@/components/map/ride-map';
 import { Button } from '@/components/ui/button';
+import { PaymentQR } from '@/components/ui/payment-qr';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { Text } from '@/components/ui/text';
 import { OtpInput } from '@/features/auth/components/otp-input';
@@ -235,15 +236,22 @@ export function CaptainHomeScreenView() {
 
               {stage === 'completed' && request ? (
                 <View style={styles.tripBlock}>
-                  <View style={[styles.doneTick, { backgroundColor: theme.colors.success }]}>
-                    <Ionicons name="checkmark" size={30} color="#fff" />
-                  </View>
                   <Text variant="h3" align="center">
                     Trip completed
                   </Text>
-                  <Text variant="body" tone="secondary" align="center">
-                    Collect NPR {request.fare} in cash from {request.riderName.split(' ')[0]}.
+                  <Text variant="bodySm" tone="secondary" align="center">
+                    Show this QR — {request.riderName.split(' ')[0]} scans it to pay NPR {request.fare} to your wallet.
                   </Text>
+                  <View style={styles.qrWrap}>
+                    <PaymentQR
+                      amount={request.fare}
+                      label={`SajhaRide · NPR ${request.fare}`}
+                      color={theme.colors.text}
+                    />
+                    <Text variant="h2" tone="brand" style={styles.qrAmount}>
+                      NPR {request.fare}
+                    </Text>
+                  </View>
                 </View>
               ) : null}
             </ScrollView>
@@ -409,15 +417,8 @@ const styles = StyleSheet.create({
   pinBlock: { marginTop: 8, gap: 12 },
   pinHint: { textAlign: 'center' },
   pinErr: { marginTop: 4 },
-  doneTick: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    alignSelf: 'center',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 8,
-  },
+  qrWrap: { alignItems: 'center', gap: 10, marginTop: 8 },
+  qrAmount: { fontWeight: '700' },
   action: { paddingHorizontal: 20, paddingTop: 12 },
   onlineToggle: {
     flexDirection: 'row',
