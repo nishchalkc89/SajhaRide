@@ -28,14 +28,22 @@ export function RideMap({
   nearbyVehicles,
   driverLocation,
   showRoute,
+  follow,
   style,
   children,
 }: RideMapProps) {
   const theme = useTheme();
   const mapRef = useRef<MapView>(null);
 
-  // Whenever the set of key points changes, frame them all.
+  // Navigation mode: keep the camera locked on the moving vehicle.
   useEffect(() => {
+    if (!follow || !mapRef.current) return;
+    mapRef.current.animateCamera({ center: follow, zoom: 16 }, { duration: 800 });
+  }, [follow]);
+
+  // Otherwise, whenever the set of key points changes, frame them all.
+  useEffect(() => {
+    if (follow) return;
     const points: LatLng[] = [pickup, destination, driverLocation].filter(
       (p): p is LatLng => !!p
     );
@@ -48,7 +56,7 @@ export function RideMap({
       });
     }, 350);
     return () => clearTimeout(id);
-  }, [pickup, destination, driverLocation]);
+  }, [pickup, destination, driverLocation, follow]);
 
   // On Android, Google is the only provider; on iOS default to Google too for
   // parity with the reference (Apple Maps styling differs noticeably).
@@ -80,7 +88,12 @@ export function RideMap({
           </Marker>
         ) : null}
 
-        {driverLocation ? (
+        {/* Live navigation marker (the moving bike) takes priority. */}
+        {follow ? (
+          <Marker coordinate={follow} anchor={{ x: 0.5, y: 0.5 }} tracksViewChanges={false}>
+            <NavMarker color={theme.colors.primary} />
+          </Marker>
+        ) : driverLocation ? (
           <Marker coordinate={driverLocation} anchor={{ x: 0.5, y: 0.5 }} tracksViewChanges={false}>
             <VehicleMarker color={theme.colors.text} />
           </Marker>
@@ -133,6 +146,11 @@ function VehicleMarker({ color }: { color: string }) {
   return <View style={[styles.vehicle, { backgroundColor: color }]} />;
 }
 
+/** The live navigation puck (moving bike). */
+function NavMarker({ color }: { color: string }) {
+  return <View style={[styles.navMarker, { backgroundColor: color }]} />;
+}
+
 const styles = StyleSheet.create({
   root: { flex: 1, overflow: 'hidden' },
   pickupDot: {
@@ -164,5 +182,12 @@ const styles = StyleSheet.create({
     width: 22,
     height: 12,
     borderRadius: 3,
+  },
+  navMarker: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 3,
+    borderColor: '#fff',
   },
 });

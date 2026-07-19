@@ -20,6 +20,7 @@ import { PaymentQR } from '@/components/ui/payment-qr';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { Text } from '@/components/ui/text';
 import { OtpInput } from '@/features/auth/components/otp-input';
+import { useDriveSimulation } from '@/hooks/use-drive-simulation';
 import { useHaptics } from '@/hooks/use-haptics';
 import { CAPTAIN_START_PIN, useCaptainStore } from '@/store/captain-store';
 import { toast } from '@/store/toast-store';
@@ -57,6 +58,13 @@ export function CaptainHomeScreenView() {
   const [pinError, setPinError] = useState(false);
 
   const isOnline = stage !== 'offline';
+
+  // Live navigation: the bike drives from pickup to drop while riding.
+  const { position: bikePosition } = useDriveSimulation(
+    request?.pickupCoord,
+    request?.dropCoord,
+    stage === 'riding'
+  );
 
   // While idling online, surface a demo request after a short delay.
   const requestTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -105,7 +113,8 @@ export function CaptainHomeScreenView() {
           pickup={request?.pickupCoord}
           destination={stage === 'riding' ? request?.dropCoord : request?.pickupCoord}
           driverLocation={request?.pickupCoord}
-          showRoute={stage === 'accepted' || stage === 'riding'}>
+          showRoute={stage === 'accepted'}
+          follow={stage === 'riding' ? bikePosition : undefined}>
           <View style={[styles.header, { paddingTop: insets.top }]}>
             <ScreenHeader
               title="Captain"

@@ -16,6 +16,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { RideMap } from '@/components/map/ride-map';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
+import { useDriveSimulation } from '@/hooks/use-drive-simulation';
 import { NEARBY_VEHICLES } from '@/services/mock-data';
 import { useRideStore } from '@/store/ride-store';
 import { toast } from '@/store/toast-store';
@@ -26,7 +27,7 @@ import { DriverCard } from './components/driver-card';
 /** Driver reaches the pickup this long after assignment. */
 const ARRIVE_AFTER_MS = 4000;
 /** Trip auto-completes this long after it starts. */
-const TRIP_DURATION_MS = 5000;
+const TRIP_DURATION_MS = 12000;
 
 const STAGE_COPY = {
   assigned: { title: 'Driver on the way', subtitle: '2 min · 500 m away' },
@@ -68,10 +69,14 @@ export function TrackingScreenView() {
   const isArrived = stage === 'arrived';
   const inProgress = stage === 'in_progress';
 
-  // Driver sits at pickup until the trip starts, then "moves" toward the drop.
-  const driverLocation = inProgress
-    ? { latitude: (pickup.coordinate.latitude + (destination?.coordinate.latitude ?? pickup.coordinate.latitude)) / 2, longitude: (pickup.coordinate.longitude + (destination?.coordinate.longitude ?? pickup.coordinate.longitude)) / 2 }
-    : pickup.coordinate;
+  // While the trip is underway the bike drives live from pickup toward drop.
+  const { position: bikePosition } = useDriveSimulation(
+    pickup.coordinate,
+    destination?.coordinate,
+    inProgress,
+    TRIP_DURATION_MS
+  );
+  const driverLocation = inProgress ? bikePosition ?? pickup.coordinate : pickup.coordinate;
 
   if (!driver) {
     // Guard: reached without an assignment (e.g. deep link) — send home.
@@ -95,7 +100,8 @@ export function TrackingScreenView() {
           destination={destination?.coordinate}
           driverLocation={driverLocation}
           nearbyVehicles={inProgress ? [] : NEARBY_VEHICLES}
-          showRoute>
+          showRoute={!inProgress}
+          follow={inProgress ? bikePosition : undefined}>
           <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
             <View style={[styles.headerCard, { backgroundColor: theme.colors.surface }, theme.elevation.md]}>
               <Text variant="h3">{copy.title}</Text>

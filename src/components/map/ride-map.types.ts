@@ -22,6 +22,11 @@ export type RideMapProps = {
   driverLocation?: LatLng;
   /** Draw the dashed pickup→destination route. */
   showRoute?: boolean;
+  /**
+   * Navigation mode: center/follow this live position (the moving bike) with a
+   * centered vehicle marker, instead of framing the whole route.
+   */
+  follow?: LatLng;
   /** Region to frame, [pickup, destination, driver] auto-fit otherwise. */
   style?: StyleProp<ViewStyle>;
   /** Overlay content (FABs, cards) rendered above the map. */
