@@ -64,7 +64,7 @@ export function OnboardingScreenView() {
 
   const finish = useCallback(() => {
     completeOnboarding();
-    router.replace('/login');
+    router.replace('/role-select');
   }, [completeOnboarding, router]);
 
   const handleNext = useCallback(() => {

@@ -93,8 +93,9 @@ export const NEPAL_PLACES: NamedPlace[] = ROWS.map(([id, title, subtitle, lat, l
 }));
 
 /**
- * Keyword search over the catalogue. Matches title or subtitle (city), ranks
- * prefix/word-start hits above mid-string ones. Returns [] for an empty query.
+ * Instant local search over the built-in catalogue. Matches title or subtitle
+ * (city), ranks prefix/word-start hits above mid-string ones. Returns [] for an
+ * empty query. Used for zero-latency suggestions before the network responds.
  */
 export function searchPlaces(query: string, limit = 12): NamedPlace[] {
   const q = query.trim().toLowerCase();
@@ -114,4 +115,53 @@ export function searchPlaces(query: string, limit = 12): NamedPlace[] {
 
   scored.sort((a, b) => a.score - b.score || a.place.title.localeCompare(b.place.title));
   return scored.slice(0, limit).map((r) => r.place);
+}
+
+/**
+ * Live geocoding across ALL of Nepal via OpenStreetMap Nominatim (keyless).
+ * This is what makes far-flung queries like "dang tulsipur" resolve — the
+ * static list only covers major hubs. Throttle callers to ~1 req/sec per
+ * Nominatim's usage policy (the search screen debounces).
+ */
+export async function searchPlacesRemote(query: string, signal?: AbortSignal): Promise<NamedPlace[]> {
+  const q = query.trim();
+  if (q.length < 2) return [];
+
+  const url =
+    `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}` +
+    `&countrycodes=np&format=jsonv2&addressdetails=1&limit=12`;
+
+  try {
+    const res = await fetch(url, { signal, headers: { Accept: 'application/json' } });
+    if (!res.ok) return [];
+    const rows: NominatimRow[] = await res.json();
+    return rows.map(toNamedPlace);
+  } catch {
+    // Network/abort — caller falls back to local results.
+    return [];
+  }
+}
+
+type NominatimRow = {
+  place_id: number;
+  lat: string;
+  lon: string;
+  name?: string;
+  display_name: string;
+  address?: Record<string, string>;
+};
+
+function toNamedPlace(row: NominatimRow): NamedPlace {
+  const a = row.address ?? {};
+  // Prefer the specific name; fall back to the first display_name segment.
+  const primary = row.name || row.display_name.split(',')[0];
+  const locality = a.city || a.town || a.village || a.municipality || a.county || a.state_district || a.state;
+  const subtitle = locality && locality !== primary ? locality : row.display_name.split(',').slice(1, 3).join(',').trim();
+
+  return {
+    id: `osm-${row.place_id}`,
+    title: primary,
+    subtitle: subtitle || undefined,
+    coordinate: { latitude: parseFloat(row.lat), longitude: parseFloat(row.lon) },
+  };
 }

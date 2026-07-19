@@ -39,14 +39,36 @@ export type RideRequest = {
   vehicle: VehicleId;
 };
 
+/** The captain's registered identity + vehicle. */
+export type CaptainProfile = {
+  fullName: string;
+  phone: string;
+  email: string;
+  citizenshipNo: string;
+  licenseNo: string;
+  vehicleType: VehicleId;
+  vehicleModel: string;
+  plate: string;
+  rating: number;
+  /** Whether required documents were "uploaded" during registration. */
+  documents: { bikePhoto: boolean; license: boolean; citizenship: boolean };
+};
+
 type CaptainState = {
   stage: CaptainStage;
   request: RideRequest | null;
+  /** Registered captain identity, or null before registration. */
+  profile: CaptainProfile | null;
+  /** Withdrawable balance the captain has earned (QR payments land here). */
+  walletBalance: number;
   /** Today's totals. */
   earningsToday: number;
   tripsToday: number;
   onlineMinutes: number;
 
+  registerCaptain: (profile: CaptainProfile) => void;
+  creditWallet: (amount: number) => void;
+  withdraw: (amount: number) => boolean;
   goOnline: () => void;
   goOffline: () => void;
   receiveRequest: (request: RideRequest) => void;
@@ -63,9 +85,19 @@ export const useCaptainStore = create<CaptainState>()(
     (set, get) => ({
       stage: 'offline',
       request: null,
+      profile: null,
+      walletBalance: 2480,
       earningsToday: 840,
       tripsToday: 6,
       onlineMinutes: 214,
+
+      registerCaptain: (profile) => set({ profile }),
+      creditWallet: (amount) => set({ walletBalance: get().walletBalance + amount }),
+      withdraw: (amount) => {
+        if (amount <= 0 || amount > get().walletBalance) return false;
+        set({ walletBalance: get().walletBalance - amount });
+        return true;
+      },
 
       goOnline: () => set({ stage: 'online' }),
       goOffline: () => set({ stage: 'offline', request: null }),
@@ -94,8 +126,11 @@ export const useCaptainStore = create<CaptainState>()(
     {
       name: 'captain',
       storage: createJSONStorage(() => zustandStorage),
-      // Persist the day's tallies only; session stage/request stay in memory.
+      // Persist identity, wallet and the day's tallies; session stage/request
+      // stay in memory.
       partialize: (s) => ({
+        profile: s.profile,
+        walletBalance: s.walletBalance,
         earningsToday: s.earningsToday,
         tripsToday: s.tripsToday,
         onlineMinutes: s.onlineMinutes,
