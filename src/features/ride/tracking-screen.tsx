@@ -18,6 +18,7 @@ import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { NEARBY_VEHICLES } from '@/services/mock-data';
 import { useRideStore } from '@/store/ride-store';
+import { toast } from '@/store/toast-store';
 import { useTheme } from '@/theme';
 
 import { DriverCard } from './components/driver-card';
@@ -44,6 +45,7 @@ export function TrackingScreenView() {
   const driver = useRideStore((s) => s.driver);
   const stage = useRideStore((s) => s.stage);
   const setStage = useRideStore((s) => s.setStage);
+  const ridePin = useRideStore((s) => s.ridePin);
 
   // assigned → arrived (driver reaches pickup).
   useEffect(() => {
@@ -140,6 +142,25 @@ export function TrackingScreenView() {
 
         <DriverCard driver={driver} />
 
+        {/* Rapid PIN — rider shares this with the captain to start the ride. */}
+        {!inProgress ? (
+          <View
+            style={[
+              styles.pinCard,
+              { backgroundColor: theme.colors.primarySubtle, borderColor: theme.colors.primary },
+            ]}>
+            <View style={styles.pinTextCol}>
+              <Text variant="caption" tone="secondary">
+                Share this PIN with your captain to start
+              </Text>
+              <Text variant="h1" style={styles.pinDigits}>
+                {ridePin}
+              </Text>
+            </View>
+            <Ionicons name="shield-checkmark" size={30} color={theme.colors.primary} />
+          </View>
+        ) : null}
+
         {/* Arrived banner */}
         {isArrived ? (
           <View style={[styles.arrivedBanner, { backgroundColor: theme.colors.successSubtle }]}>
@@ -181,9 +202,15 @@ export function TrackingScreenView() {
             <View style={styles.actionRow}>
               <Button label="Emergency" variant="danger" fullWidth={false} style={styles.flex1}
                 leadingIcon={<Ionicons name="alert-circle" size={18} color={theme.colors.onPrimary} />}
-                onPress={() => {}}
+                onPress={() => toast('Emergency contacts and support alerted', 'error')}
               />
-              <Button label="Share Trip" variant="secondary" fullWidth={false} style={styles.flex1} onPress={() => {}} />
+              <Button
+                label="Share Trip"
+                variant="secondary"
+                fullWidth={false}
+                style={styles.flex1}
+                onPress={() => toast('Trip link copied to clipboard', 'success')}
+              />
             </View>
           ) : (
             <View style={styles.actionRow}>
@@ -198,7 +225,13 @@ export function TrackingScreenView() {
                   Cancel Ride
                 </Text>
               </Pressable>
-              <Button label="Share Live Location" variant="secondary" fullWidth={false} style={styles.flex1} onPress={() => {}} />
+              <Button
+                label="Share Live Location"
+                variant="secondary"
+                fullWidth={false}
+                style={styles.flex1}
+                onPress={() => toast('Live location shared', 'success')}
+              />
             </View>
           )}
         </View>
@@ -224,6 +257,17 @@ const styles = StyleSheet.create({
   },
   stat: { flex: 1, alignItems: 'center', gap: 2 },
   statDivider: { width: StyleSheet.hairlineWidth * 2 },
+  pinCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 16,
+    borderRadius: 16,
+    borderWidth: 1.5,
+    marginTop: 16,
+  },
+  pinTextCol: { gap: 2 },
+  pinDigits: { letterSpacing: 8 },
   arrivedBanner: {
     flexDirection: 'row',
     alignItems: 'center',

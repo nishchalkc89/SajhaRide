@@ -5,11 +5,12 @@
 
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
+import { toast } from '@/store/toast-store';
 import { useTheme } from '@/theme';
 
 type Txn = {
@@ -58,9 +59,15 @@ export function WalletScreenView() {
               size="md"
               fullWidth={false}
               leadingIcon={<Ionicons name="add" size={18} color={theme.colors.onPrimary} />}
-              onPress={() => {}}
+              onPress={() => toast('Top up via eSewa, Khalti or bank — coming soon')}
             />
-            <Button label="Withdraw" size="md" variant="secondary" fullWidth={false} onPress={() => {}} />
+            <Button
+              label="Withdraw"
+              size="md"
+              variant="secondary"
+              fullWidth={false}
+              onPress={() => toast('Withdrawals open once KYC is verified')}
+            />
           </View>
         </View>
 
@@ -71,8 +78,11 @@ export function WalletScreenView() {
           </Text>
           <View style={styles.topupRow}>
             {TOPUP_AMOUNTS.map((amt) => (
-              <View
+              <Pressable
                 key={amt}
+                onPress={() => toast(`Adding NPR ${amt} to your wallet…`, 'success')}
+                accessibilityRole="button"
+                accessibilityLabel={`Top up NPR ${amt}`}
                 style={[
                   styles.topupChip,
                   { borderColor: theme.colors.border, backgroundColor: theme.colors.surface },
@@ -80,7 +90,7 @@ export function WalletScreenView() {
                 <Text variant="bodyLg" style={styles.topupText}>
                   {amt}
                 </Text>
-              </View>
+              </Pressable>
             ))}
           </View>
         </View>

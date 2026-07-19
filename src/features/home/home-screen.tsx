@@ -9,13 +9,14 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { LogoMark } from '@/components/brand/logo-mark';
 import { RideMap } from '@/components/map/ride-map';
 import { Text } from '@/components/ui/text';
+import { useCurrentLocation } from '@/hooks/use-current-location';
 import {
   EXPLORE_CATEGORIES,
   NEARBY_VEHICLES,
@@ -23,6 +24,7 @@ import {
   SAVED_PLACES,
 } from '@/services/mock-data';
 import { useRideStore } from '@/store/ride-store';
+import { toast } from '@/store/toast-store';
 import { useTheme } from '@/theme';
 import type { NamedPlace } from '@/types/ride';
 
@@ -40,10 +42,35 @@ export function HomeScreenView() {
   const pickup = useRideStore((s) => s.pickup);
   const destination = useRideStore((s) => s.destination);
   const setDestination = useRideStore((s) => s.setDestination);
+  const setPickup = useRideStore((s) => s.setPickup);
   const setStage = useRideStore((s) => s.setStage);
+  const { fetchLocation } = useCurrentLocation();
 
   // Recent searches are local so "Clear All" can empty them in-session.
   const [recents, setRecents] = useState<NamedPlace[]>(RECENT_SEARCHES);
+
+  // On first mount, replace the placeholder pickup with the device's real
+  // location so the map reflects where the user actually is.
+  useEffect(() => {
+    let cancelled = false;
+    void fetchLocation().then((place) => {
+      if (place && !cancelled) setPickup(place);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [fetchLocation, setPickup]);
+
+  const recenter = useCallback(async () => {
+    toast('Finding your location…');
+    const place = await fetchLocation();
+    if (place) {
+      setPickup(place);
+      toast(`Pickup set to ${place.title}`, 'success');
+    } else {
+      toast('Location unavailable — check permissions', 'error');
+    }
+  }, [fetchLocation, setPickup]);
 
   const chooseDestination = (place: NamedPlace) => {
     setDestination(place);
@@ -73,7 +100,10 @@ export function HomeScreenView() {
               Sajha<Text variant="h3" tone="brand">Ride</Text>
             </Text>
           </View>
-          <MapControlButton icon="notifications-outline" onPress={() => {}} />
+          <MapControlButton
+            icon="notifications-outline"
+            onPress={() => toast('You have no new notifications')}
+          />
         </View>
 
         {/* Where-to card */}
@@ -94,7 +124,7 @@ export function HomeScreenView() {
         <View style={[styles.mapWrap, { height: mapHeight, borderRadius: theme.radius.xl }]}>
           <RideMap pickup={pickup.coordinate} destination={destination?.coordinate} nearbyVehicles={NEARBY_VEHICLES}>
             <View style={styles.mapControls}>
-              <MapControlButton icon="locate" onPress={() => {}} />
+              <MapControlButton icon="locate" onPress={recenter} />
             </View>
             <View style={[styles.etaBadge, { backgroundColor: theme.colors.surface }, theme.elevation.md]}>
               <Text variant="caption" tone="secondary">

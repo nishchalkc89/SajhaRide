@@ -27,9 +27,9 @@ type Trip = {
 
 const TRIPS: Trip[] = [
   { id: 'r1', from: 'Balkumari', to: 'Thamel, Kathmandu', date: 'Today, 10:24 AM', fare: 65, vehicle: 'Bike', status: 'completed' },
-  { id: 'r2', from: 'Kupandole', to: 'Tribhuvan Airport', date: 'Jul 15, 8:02 AM', fare: 210, vehicle: 'Car', status: 'completed' },
+  { id: 'r2', from: 'Kupandole', to: 'Tribhuvan Airport', date: 'Jul 15, 8:02 AM', fare: 150, vehicle: 'Auto', status: 'completed' },
   { id: 'r3', from: 'New Baneshwor', to: 'Patan Durbar Square', date: 'Jul 12, 5:40 PM', fare: 95, vehicle: 'Bike', status: 'cancelled' },
-  { id: 'r4', from: 'Jawalakhel', to: 'Boudhanath Stupa', date: 'Jul 10, 1:15 PM', fare: 180, vehicle: 'Auto', status: 'completed' },
+  { id: 'r4', from: 'Jawalakhel', to: 'Boudhanath Stupa', date: 'Jul 10, 1:15 PM', fare: 130, vehicle: 'Auto', status: 'completed' },
 ];
 
 export function BookingsScreenView() {

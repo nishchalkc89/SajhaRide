@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { Text } from '@/components/ui/text';
 import { computeFareBreakdown, useRideStore } from '@/store/ride-store';
+import { toast } from '@/store/toast-store';
 import { useTheme } from '@/theme';
 
 export function ReceiptScreenView() {
@@ -107,7 +108,7 @@ export function ReceiptScreenView() {
         <Button
           label="Download Receipt"
           variant="secondary"
-          onPress={() => {}}
+          onPress={() => toast('Receipt saved to your downloads', 'success')}
           leadingIcon={<Ionicons name="download-outline" size={18} color={theme.colors.text} />}
           style={styles.download}
         />

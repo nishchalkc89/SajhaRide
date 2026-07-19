@@ -13,6 +13,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button } from '@/components/ui/button';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { Text } from '@/components/ui/text';
+import { toast } from '@/store/toast-store';
 import { useTheme } from '@/theme';
 
 type Topic = {
@@ -54,7 +55,11 @@ export function SupportScreenView() {
           {TOPICS.map((topic, i) => (
             <View key={topic.id}>
               {i > 0 ? <View style={[styles.divider, { backgroundColor: theme.colors.border }]} /> : null}
-              <Pressable style={styles.topicRow} accessibilityRole="button" accessibilityLabel={topic.title}>
+              <Pressable
+                onPress={() => toast(`${topic.title}: opening help…`)}
+                style={styles.topicRow}
+                accessibilityRole="button"
+                accessibilityLabel={topic.title}>
                 <View style={[styles.topicIcon, { backgroundColor: theme.colors.surfaceMuted }]}>
                   <Ionicons name={topic.icon} size={20} color={theme.colors.text} />
                 </View>
@@ -87,7 +92,7 @@ export function SupportScreenView() {
 
         <Button
           label="Start a Chat"
-          onPress={() => {}}
+          onPress={() => toast('Connecting you to a support agent…', 'success')}
           leadingIcon={<Ionicons name="chatbubble-ellipses" size={18} color={theme.colors.onPrimary} />}
           style={styles.cta}
         />

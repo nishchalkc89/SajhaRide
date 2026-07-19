@@ -23,6 +23,7 @@ import { StyleSheet } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { ToastHost } from '@/components/ui/toast-host';
 import { ThemeProvider } from '@/theme/theme-provider';
 
 // Hold the native splash until fonts resolve, so the branded screen never
@@ -67,6 +68,8 @@ export default function RootLayout() {
                 animation: 'fade',
               }}
             />
+            {/* Global toast layer, above every screen. */}
+            <ToastHost />
           </ThemeProvider>
         </QueryClientProvider>
       </SafeAreaProvider>

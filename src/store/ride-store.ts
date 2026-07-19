@@ -26,6 +26,8 @@ type RideState = {
   driver: Driver | null;
   paymentMethod: PaymentMethod;
   rating: number;
+  /** Rapido-style fixed 4-digit start PIN the rider shares with the captain. */
+  ridePin: string;
 
   setPickup: (place: NamedPlace) => void;
   setDestination: (place: NamedPlace | null) => void;
@@ -61,6 +63,8 @@ export const useRideStore = create<RideState>((set, get) => ({
   driver: null,
   paymentMethod: 'cash',
   rating: 0,
+  // Fixed per-rider PIN (like Rapido's Rapid PIN): easy to recall + share.
+  ridePin: '4 2 4 2',
 
   setPickup: (pickup) => set({ pickup }),
   setDestination: (destination) => set({ destination }),

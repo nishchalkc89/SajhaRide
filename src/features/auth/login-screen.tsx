@@ -28,6 +28,7 @@ import { Text } from '@/components/ui/text';
 import { TextField } from '@/components/ui/text-field';
 import { useHaptics } from '@/hooks/use-haptics';
 import { useAuthStore } from '@/store/auth-store';
+import { toast } from '@/store/toast-store';
 import { useTheme } from '@/theme';
 
 import { AuthDivider } from './components/auth-divider';
@@ -149,7 +150,7 @@ export function LoginScreenView() {
           />
 
           <Pressable
-            onPress={() => {}}
+            onPress={() => toast('Password reset link sent to your number')}
             hitSlop={8}
             accessibilityRole="button"
             style={styles.forgot}>
@@ -170,8 +171,8 @@ export function LoginScreenView() {
           </View>
 
           <View style={styles.socials}>
-            <SocialButton provider="google" />
-            <SocialButton provider="apple" />
+            <SocialButton provider="google" onPress={() => toast('Google sign-in — coming soon')} />
+            <SocialButton provider="apple" onPress={() => toast('Apple sign-in — coming soon')} />
           </View>
 
           <View style={styles.footer}>

@@ -9,6 +9,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Text } from '@/components/ui/text';
 import { useHaptics } from '@/hooks/use-haptics';
+import { toast } from '@/store/toast-store';
 import { useTheme } from '@/theme';
 import type { Driver } from '@/types/ride';
 
@@ -46,14 +47,20 @@ export function DriverCard({ driver }: { driver: Driver }) {
 
       <View style={styles.actions}>
         <Pressable
-          onPress={() => haptic('light')}
+          onPress={() => {
+            haptic('light');
+            toast(`Calling ${driver.name}…`);
+          }}
           accessibilityRole="button"
           accessibilityLabel="Call driver"
           style={[styles.action, { backgroundColor: theme.colors.successSubtle }]}>
           <Ionicons name="call" size={18} color={theme.colors.success} />
         </Pressable>
         <Pressable
-          onPress={() => haptic('light')}
+          onPress={() => {
+            haptic('light');
+            toast('Opening chat with your driver…');
+          }}
           accessibilityRole="button"
           accessibilityLabel="Message driver"
           style={[styles.action, { backgroundColor: theme.colors.infoSubtle }]}>

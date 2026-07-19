@@ -17,7 +17,7 @@ export type SavedPlace = NamedPlace & {
   kind: SavedPlaceKind;
 };
 
-export type VehicleId = 'bike' | 'auto' | 'car' | 'suv' | 'premium';
+export type VehicleId = 'bike' | 'auto';
 
 export type Vehicle = {
   id: VehicleId;

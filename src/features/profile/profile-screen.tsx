@@ -13,6 +13,7 @@ import { Text } from '@/components/ui/text';
 import { useHaptics } from '@/hooks/use-haptics';
 import { useAuthStore } from '@/store/auth-store';
 import { useSettingsStore, type ThemePreference } from '@/store/settings-store';
+import { toast } from '@/store/toast-store';
 import { useTheme } from '@/theme';
 
 type Row = {
@@ -109,6 +110,26 @@ export function ProfileScreenView() {
           <Ionicons name="chevron-forward" size={20} color={theme.colors.textTertiary} />
         </View>
 
+        {/* Captain mode entry */}
+        <Pressable
+          onPress={() => router.push('/captain')}
+          accessibilityRole="button"
+          accessibilityLabel="Switch to Captain mode"
+          style={[styles.captainCard, { backgroundColor: theme.colors.primary }, theme.elevation.sm]}>
+          <View style={styles.captainIcon}>
+            <Ionicons name="speedometer" size={24} color={theme.colors.onPrimary} />
+          </View>
+          <View style={styles.captainText}>
+            <Text variant="bodyLg" tone="onPrimary" style={styles.captainTitle}>
+              Drive with SajhaRide
+            </Text>
+            <Text variant="bodySm" tone="onPrimary" style={styles.captainSub}>
+              Switch to Captain mode & start earning
+            </Text>
+          </View>
+          <Ionicons name="arrow-forward" size={20} color={theme.colors.onPrimary} />
+        </Pressable>
+
         {groups.map((group) => (
           <View key={group.title} style={styles.group}>
             <Text variant="overline" tone="tertiary" style={styles.groupTitle}>
@@ -119,7 +140,7 @@ export function ProfileScreenView() {
                 <View key={row.label}>
                   {i > 0 ? <View style={[styles.divider, { backgroundColor: theme.colors.border }]} /> : null}
                   <Pressable
-                    onPress={row.onPress}
+                    onPress={row.onPress ?? (() => toast(`${row.label} — coming soon`))}
                     accessibilityRole="button"
                     accessibilityLabel={row.label}
                     style={styles.row}>
@@ -171,6 +192,26 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   userInfo: { flex: 1, gap: 2 },
+  captainCard: {
+    marginHorizontal: 20,
+    marginTop: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    padding: 16,
+    borderRadius: 16,
+  },
+  captainIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(0,0,0,0.08)',
+  },
+  captainText: { flex: 1, gap: 2 },
+  captainTitle: { fontWeight: '700' },
+  captainSub: { opacity: 0.8 },
   group: { marginTop: 24, paddingHorizontal: 20 },
   groupTitle: { marginBottom: 8, marginLeft: 4 },
   card: { borderRadius: 16, paddingHorizontal: 16 },

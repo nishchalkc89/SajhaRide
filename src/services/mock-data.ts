@@ -84,6 +84,7 @@ export const PLACE_CATALOGUE: NamedPlace[] = [
   { id: 'koteshwor', title: 'Koteshwor, Kathmandu', coordinate: { latitude: 27.6784, longitude: 85.3497 } },
 ];
 
+// Nepal's ride-hailing market is bikes and autos — no cab/car tier.
 export const VEHICLES: Vehicle[] = [
   {
     id: 'bike',
@@ -105,36 +106,6 @@ export const VEHICLES: Vehicle[] = [
     capacity: 3,
     icon: 'car-sport',
     image: require('../../assets/images/vehicles/auto.png'),
-  },
-  {
-    id: 'car',
-    name: 'Car',
-    tagline: 'Comfortable rides for everyday travel',
-    fare: 210,
-    etaMinutes: 4,
-    capacity: 4,
-    icon: 'car',
-    image: require('../../assets/images/vehicles/car.png'),
-  },
-  {
-    id: 'suv',
-    name: 'SUV',
-    tagline: 'Spacious rides for longer trips',
-    fare: 320,
-    etaMinutes: 6,
-    capacity: 6,
-    icon: 'car',
-    image: require('../../assets/images/vehicles/suv.png'),
-  },
-  {
-    id: 'premium',
-    name: 'Premium',
-    tagline: 'Top quality cars with professional drivers',
-    fare: 450,
-    etaMinutes: 7,
-    capacity: 4,
-    icon: 'car',
-    image: require('../../assets/images/vehicles/premium.png'),
   },
 ];
 
