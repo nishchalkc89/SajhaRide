@@ -1,7 +1,7 @@
-/** Route: `/captain` — Captain Home. */
+/** Captain tab: Home dashboard. */
 
 import { CaptainHomeScreenView } from '@/features/captain/captain-home-screen';
 
-export default function CaptainHome() {
+export default function CaptainHomeTab() {
   return <CaptainHomeScreenView />;
 }

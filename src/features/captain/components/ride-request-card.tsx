@@ -1,7 +1,6 @@
 /**
- * Incoming ride-request card (Rapido-style): rider, route, fare/distance, and
- * Accept / Decline with an auto-expiring countdown. The countdown bar drains
- * left→right; if it empties, the request auto-declines.
+ * Incoming ride-request card (Page 22). Big pickup distance, route, fare + rating,
+ * and Accept / Decline with an auto-expiring countdown. Auto-declines on expiry.
  */
 
 import { Ionicons } from '@expo/vector-icons';
@@ -53,99 +52,103 @@ export function RideRequestCard({
       ]}>
       <CountdownBar durationSeconds={WINDOW_SECONDS} />
 
-      <View style={styles.header}>
-        <View style={styles.riderRow}>
-          <View style={[styles.avatar, { backgroundColor: theme.colors.primary }]}>
-            <Text variant="bodyLg" tone="onPrimary">
-              {request.riderName
-                .split(' ')
-                .map((w) => w[0])
-                .slice(0, 2)
-                .join('')}
-            </Text>
+      {/* Title row */}
+      <View style={styles.titleRow}>
+        <Text variant="h3">New Ride Request</Text>
+        <View style={[styles.timer, { backgroundColor: theme.colors.primarySubtle }]}>
+          <Ionicons name="time" size={13} color={theme.colors.primary} />
+          <Text variant="caption" tone="brand" style={styles.bold}>
+            {secondsLeft}s
+          </Text>
+        </View>
+      </View>
+
+      {/* Pickup distance */}
+      <Text variant="display" style={styles.distance}>
+        {request.pickupDistanceKm} km
+      </Text>
+      <Text variant="bodySm" tone="tertiary">
+        Pickup distance
+      </Text>
+
+      {/* Route + fare */}
+      <View style={styles.routeFare}>
+        <View style={styles.routeCol}>
+          <View style={styles.railRow}>
+            <View style={[styles.dot, { backgroundColor: theme.colors.success }]} />
+            <View style={styles.railText}>
+              <Text variant="bodyLg" numberOfLines={1} style={styles.bold}>
+                {request.pickupTitle}
+              </Text>
+              <Text variant="caption" tone="tertiary" numberOfLines={1}>
+                {request.pickupAddress}
+              </Text>
+            </View>
           </View>
-          <View>
-            <Text variant="bodyLg" style={styles.name}>
-              {request.riderName}
-            </Text>
-            <View style={styles.ratingRow}>
-              <Ionicons name="star" size={12} color={theme.colors.primary} />
-              <Text variant="caption" tone="secondary">
-                {request.riderRating.toFixed(1)}
+          <View style={[styles.line, { borderColor: theme.colors.border }]} />
+          <View style={styles.railRow}>
+            <Ionicons name="location" size={14} color={theme.colors.danger} />
+            <View style={styles.railText}>
+              <Text variant="bodyLg" numberOfLines={1} style={styles.bold}>
+                {request.dropTitle}
+              </Text>
+              <Text variant="caption" tone="tertiary" numberOfLines={1}>
+                {request.dropAddress}
               </Text>
             </View>
           </View>
         </View>
-        <View style={[styles.fareTag, { backgroundColor: theme.colors.primarySubtle }]}>
+        <View style={[styles.fareBox, { borderColor: theme.colors.border }]}>
           <Text variant="h3" tone="brand">
             NPR {request.fare}
           </Text>
+          <Text variant="caption" tone="tertiary">
+            Est. Fare
+          </Text>
+        </View>
+      </View>
+
+      {/* Meta */}
+      <View style={[styles.meta, { borderTopColor: theme.colors.border }]}>
+        <View style={styles.metaItem}>
+          <Ionicons name="star" size={14} color={theme.colors.primary} />
+          <Text variant="bodySm" tone="secondary">
+            {request.riderRating.toFixed(1)}
+          </Text>
+        </View>
+        <View style={[styles.vehicleTag, { backgroundColor: theme.colors.surfaceMuted }]}>
+          <Ionicons name={request.vehicle === 'auto' ? 'car-sport' : 'bicycle'} size={13} color={theme.colors.textSecondary} />
           <Text variant="caption" tone="secondary">
-            {request.distanceKm} km
+            {request.vehicle === 'auto' ? 'Auto' : 'Bike'} Ride
           </Text>
         </View>
       </View>
 
-      {/* Route */}
-      <View style={[styles.route, { borderColor: theme.colors.border }]}>
-        <View style={styles.routeRow}>
-          <View style={[styles.dot, { backgroundColor: theme.colors.success }]} />
-          <Text variant="body" numberOfLines={1} style={styles.routeText}>
-            {request.pickupTitle}
-          </Text>
-        </View>
-        <View style={[styles.routeLine, { backgroundColor: theme.colors.border }]} />
-        <View style={styles.routeRow}>
-          <View style={[styles.dot, { backgroundColor: theme.colors.danger }]} />
-          <Text variant="body" numberOfLines={1} style={styles.routeText}>
-            {request.dropTitle}
-          </Text>
-        </View>
-      </View>
-
+      {/* Actions */}
       <View style={styles.actions}>
-        <Button
-          label="Decline"
-          variant="secondary"
-          fullWidth={false}
-          style={styles.declineBtn}
-          onPress={onDecline}
-        />
-        <Button
-          label={`Accept · ${secondsLeft}s`}
-          fullWidth={false}
-          style={styles.acceptBtn}
-          onPress={onAccept}
-        />
+        <Button label="Decline" variant="danger" fullWidth={false} style={styles.action} onPress={onDecline} />
+        <Button label="Accept" fullWidth={false} style={styles.action} onPress={onAccept} />
       </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  card: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 24 },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginTop: 16,
-  },
-  riderRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  avatar: { width: 46, height: 46, borderRadius: 23, alignItems: 'center', justifyContent: 'center' },
-  name: { fontWeight: '600' },
-  ratingRow: { flexDirection: 'row', alignItems: 'center', gap: 3 },
-  fareTag: { alignItems: 'flex-end', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12 },
-  route: {
-    borderWidth: StyleSheet.hairlineWidth * 2,
-    borderRadius: 14,
-    padding: 14,
-    marginTop: 16,
-  },
-  routeRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  dot: { width: 10, height: 10, borderRadius: 5 },
-  routeLine: { width: 2, height: 18, marginLeft: 4, marginVertical: 3 },
-  routeText: { flex: 1 },
-  actions: { flexDirection: 'row', gap: 12, marginTop: 20 },
-  declineBtn: { flex: 1 },
-  acceptBtn: { flex: 2 },
+  card: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 22 },
+  titleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 14 },
+  timer: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999 },
+  bold: { fontWeight: '700' },
+  distance: { marginTop: 12 },
+  routeFare: { flexDirection: 'row', gap: 12, marginTop: 16, alignItems: 'center' },
+  routeCol: { flex: 1 },
+  railRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
+  dot: { width: 12, height: 12, borderRadius: 6, marginTop: 3 },
+  railText: { flex: 1 },
+  line: { borderLeftWidth: 1.5, borderStyle: 'dashed', height: 14, marginLeft: 5, marginVertical: 3 },
+  fareBox: { alignItems: 'center', paddingHorizontal: 14, paddingVertical: 10, borderRadius: 12, borderWidth: StyleSheet.hairlineWidth * 2 },
+  meta: { flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 16, paddingTop: 14, borderTopWidth: StyleSheet.hairlineWidth * 2 },
+  metaItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  vehicleTag: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999 },
+  actions: { flexDirection: 'row', gap: 12, marginTop: 18 },
+  action: { flex: 1 },
 });

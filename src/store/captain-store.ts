@@ -1,11 +1,12 @@
 /**
- * Captain (driver) session — mirrors the Rapido captain flow.
+ * Captain (driver) session — a Rapido-style multi-screen flow.
  *
- * Lifecycle:
- *   offline → online (waiting) → requested (incoming) → accepted (to pickup)
- *   → arrived (enter PIN) → riding → completed → back to online.
+ * The ride pipeline is a stage machine; the captain UI is a set of routed
+ * screens that read/advance `stage`:
+ *   offline → online → requested → accepted → to_pickup → arrived → waiting
+ *   → riding → reached → completed → (rate) → online
  *
- * Earnings/trip counters persist for the day; the active request is ephemeral.
+ * Identity/wallet/day-totals persist; the active request + stage are ephemeral.
  */
 
 import { create } from 'zustand';
@@ -14,27 +15,38 @@ import { createJSONStorage, persist } from 'zustand/middleware';
 import { zustandStorage } from '@/services/storage';
 import type { LatLng, VehicleId } from '@/types/ride';
 
-/** The 4-digit start PIN the captain collects from the rider (Rapido Rapid PIN). */
+/** The 4-digit OTP the captain collects from the customer to start the ride. */
 export const CAPTAIN_START_PIN = '4242';
 
 export type CaptainStage =
   | 'offline'
   | 'online' // waiting for requests
-  | 'requested' // an incoming request is on screen
-  | 'accepted' // heading to pickup
-  | 'arrived' // at pickup, verifying PIN
-  | 'riding' // trip underway
-  | 'completed';
+  | 'requested' // an incoming request card is on screen
+  | 'accepted' // accepted, "Ride Accepted" confirmation
+  | 'to_pickup' // navigating to the pickup
+  | 'arrived' // reached pickup, waiting for the customer
+  | 'riding' // OTP verified, trip underway
+  | 'reached' // destination reached, collecting payment
+  | 'completed'; // paid + credited
+
+export type CaptainPayment = 'cash' | 'upi';
 
 export type RideRequest = {
   id: string;
   riderName: string;
   riderRating: number;
+  riderRides: number;
   pickupTitle: string;
+  pickupAddress: string;
   pickupCoord: LatLng;
   dropTitle: string;
+  dropAddress: string;
   dropCoord: LatLng;
-  distanceKm: number;
+  /** Distance from the captain to the pickup. */
+  pickupDistanceKm: number;
+  /** Total trip distance pickup→drop. */
+  totalDistanceKm: number;
+  etaMinutes: number;
   fare: number;
   vehicle: VehicleId;
 };
@@ -50,18 +62,15 @@ export type CaptainProfile = {
   vehicleModel: string;
   plate: string;
   rating: number;
-  /** Whether required documents were "uploaded" during registration. */
   documents: { bikePhoto: boolean; license: boolean; citizenship: boolean };
 };
 
 type CaptainState = {
   stage: CaptainStage;
   request: RideRequest | null;
-  /** Registered captain identity, or null before registration. */
+  paymentMethod: CaptainPayment;
   profile: CaptainProfile | null;
-  /** Withdrawable balance the captain has earned (QR payments land here). */
   walletBalance: number;
-  /** Today's totals. */
   earningsToday: number;
   tripsToday: number;
   onlineMinutes: number;
@@ -74,10 +83,13 @@ type CaptainState = {
   receiveRequest: (request: RideRequest) => void;
   acceptRequest: () => void;
   declineRequest: () => void;
+  startNavigation: () => void;
   arriveAtPickup: () => void;
   startRide: () => void;
-  completeRide: () => void;
-  dismissCompleted: () => void;
+  reachDestination: () => void;
+  setPaymentMethod: (method: CaptainPayment) => void;
+  collectPayment: () => void;
+  finishRide: () => void;
 };
 
 export const useCaptainStore = create<CaptainState>()(
@@ -85,10 +97,11 @@ export const useCaptainStore = create<CaptainState>()(
     (set, get) => ({
       stage: 'offline',
       request: null,
+      paymentMethod: 'cash',
       profile: null,
       walletBalance: 2480,
-      earningsToday: 840,
-      tripsToday: 6,
+      earningsToday: 1240,
+      tripsToday: 12,
       onlineMinutes: 214,
 
       registerCaptain: (profile) => set({ profile }),
@@ -103,31 +116,33 @@ export const useCaptainStore = create<CaptainState>()(
       goOffline: () => set({ stage: 'offline', request: null }),
 
       receiveRequest: (request) => {
-        // Only surface a request while genuinely idle-online.
         if (get().stage === 'online') set({ stage: 'requested', request });
       },
       declineRequest: () => set({ stage: 'online', request: null }),
       acceptRequest: () => {
         if (get().request) set({ stage: 'accepted' });
       },
+      startNavigation: () => set({ stage: 'to_pickup' }),
       arriveAtPickup: () => set({ stage: 'arrived' }),
       startRide: () => set({ stage: 'riding' }),
+      reachDestination: () => set({ stage: 'reached' }),
+      setPaymentMethod: (paymentMethod) => set({ paymentMethod }),
 
-      completeRide: () => {
-        const { request, earningsToday, tripsToday } = get();
+      collectPayment: () => {
+        const { request, earningsToday, tripsToday, walletBalance } = get();
+        const fare = request?.fare ?? 0;
         set({
           stage: 'completed',
-          earningsToday: earningsToday + (request?.fare ?? 0),
+          earningsToday: earningsToday + fare,
           tripsToday: tripsToday + 1,
+          walletBalance: walletBalance + fare,
         });
       },
-      dismissCompleted: () => set({ stage: 'online', request: null }),
+      finishRide: () => set({ stage: 'online', request: null, paymentMethod: 'cash' }),
     }),
     {
       name: 'captain',
       storage: createJSONStorage(() => zustandStorage),
-      // Persist identity, wallet and the day's tallies; session stage/request
-      // stay in memory.
       partialize: (s) => ({
         profile: s.profile,
         walletBalance: s.walletBalance,
