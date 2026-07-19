@@ -206,7 +206,7 @@ export function CaptainHomeScreenView() {
                     <Text variant="h3">
                       {stage === 'accepted' ? 'Head to pickup' : 'Verify PIN to start'}
                     </Text>
-                    <ContactButtons name={request.riderName} theme={theme} onNav={(p) => router.push(p)} />
+                    <ContactButtons name={request.riderName} theme={theme} />
                   </View>
                   <ActiveRoute request={request} theme={theme} />
 
@@ -243,7 +243,7 @@ export function CaptainHomeScreenView() {
                 <View style={styles.tripBlock}>
                   <View style={styles.tripHead}>
                     <Text variant="h3">Ride in progress</Text>
-                    <ContactButtons name={request.riderName} theme={theme} onNav={(p) => router.push(p)} />
+                    <ContactButtons name={request.riderName} theme={theme} />
                   </View>
                   <ActiveRoute request={request} theme={theme} />
                 </View>
@@ -327,6 +327,30 @@ function Stat({ label, value, theme }: { label: string; value: string; theme: Re
       <Text variant="caption" tone="tertiary">
         {label}
       </Text>
+    </View>
+  );
+}
+
+/** Call + chat buttons for reaching the rider during an active trip. */
+function ContactButtons({ name, theme }: { name: string; theme: ReturnType<typeof useTheme> }) {
+  const router = useRouter();
+  const contact = encodeURIComponent(name);
+  return (
+    <View style={styles.contactRow}>
+      <Pressable
+        onPress={() => router.push(`/call?name=${contact}`)}
+        accessibilityRole="button"
+        accessibilityLabel="Call rider"
+        style={[styles.contactBtn, { backgroundColor: theme.colors.successSubtle }]}>
+        <Ionicons name="call" size={18} color={theme.colors.success} />
+      </Pressable>
+      <Pressable
+        onPress={() => router.push(`/chat?name=${contact}`)}
+        accessibilityRole="button"
+        accessibilityLabel="Message rider"
+        style={[styles.contactBtn, { backgroundColor: theme.colors.infoSubtle }]}>
+        <Ionicons name="chatbubble-ellipses" size={18} color={theme.colors.info} />
+      </Pressable>
     </View>
   );
 }
@@ -425,6 +449,9 @@ const styles = StyleSheet.create({
   panelTitle: { marginTop: 16 },
   panelSubtitle: { marginTop: 6, maxWidth: 280 },
   tripBlock: { paddingVertical: 12, gap: 12, alignItems: 'stretch' },
+  tripHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  contactRow: { flexDirection: 'row', gap: 8 },
+  contactBtn: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
   activeRoute: { borderWidth: StyleSheet.hairlineWidth * 2, borderRadius: 14, padding: 14 },
   routeRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   dot: { width: 10, height: 10, borderRadius: 5 },
