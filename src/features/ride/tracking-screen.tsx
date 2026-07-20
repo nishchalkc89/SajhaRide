@@ -224,17 +224,24 @@ export function TrackingScreenView() {
               trailingIcon={<Ionicons name="arrow-forward" size={18} color={theme.colors.onPrimary} />}
             />
           ) : inProgress ? (
-            <View style={styles.actionRow}>
-              <Button label="Emergency" variant="danger" fullWidth={false} style={styles.flex1}
-                leadingIcon={<Ionicons name="alert-circle" size={18} color={theme.colors.onPrimary} />}
-                onPress={() => toast('Emergency contacts and support alerted', 'error')}
+            <View style={styles.onRideActions}>
+              <OnRideAction
+                icon="call"
+                label="Call Captain"
+                theme={theme}
+                onPress={() => router.push(`/call?name=${encodeURIComponent(driver.name)}`)}
               />
-              <Button
-                label="Share Trip"
-                variant="secondary"
-                fullWidth={false}
-                style={styles.flex1}
-                onPress={() => toast('Trip link copied to clipboard', 'success')}
+              <OnRideAction
+                icon="chatbubble-ellipses"
+                label="Chat"
+                theme={theme}
+                onPress={() => router.push(`/chat?name=${encodeURIComponent(driver.name)}`)}
+              />
+              <OnRideAction
+                icon="share-social"
+                label="Share Live"
+                theme={theme}
+                onPress={() => toast('Live location shared', 'success')}
               />
             </View>
           ) : (
