@@ -21,7 +21,7 @@ import { useTheme } from '@/theme';
 
 import { SearchingBar } from './components/searching-bar';
 
-const SEARCH_STEPS = ['Searching for drivers', 'Finding best match', 'Driver on the way', 'Arriving soon'];
+const SEARCH_STEPS = ['Searching for captains', 'Finding best match', 'Captain on the way', 'Arriving soon'];
 
 /** How long the mock search runs before a driver is assigned. */
 const SEARCH_DURATION_MS = 5000;
@@ -64,7 +64,7 @@ export function FindingDriverScreenView() {
           showRoute>
           <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
             <View style={styles.headerText}>
-              <Text variant="h3">Finding you a driver…</Text>
+              <Text variant="h3">Finding you a captain…</Text>
               <Text variant="bodySm" tone="secondary">
                 This usually takes less than a minute
               </Text>
@@ -98,7 +98,7 @@ export function FindingDriverScreenView() {
 
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}>
           <Text variant="h3" align="center" style={styles.title}>
-            We are finding you the best driver
+            We are finding you the best captain
           </Text>
           <Text variant="bodySm" tone="secondary" align="center">
             Please wait a moment…
@@ -142,7 +142,7 @@ export function FindingDriverScreenView() {
                 Safety First
               </Text>
               <Text variant="bodySm" tone="secondary">
-                All our drivers are verified and background checked.
+                All our captains are verified and background checked.
               </Text>
             </View>
           </View>

@@ -30,8 +30,8 @@ const ARRIVE_AFTER_MS = 4000;
 const TRIP_DURATION_MS = 12000;
 
 const STAGE_COPY = {
-  assigned: { title: 'Driver on the way', subtitle: '2 min · 500 m away' },
-  arrived: { title: 'Driver has arrived', subtitle: 'Meet at the pickup point' },
+  assigned: { title: 'Captain is on the way', subtitle: '2 min · 500 m away' },
+  arrived: { title: 'Captain has arrived', subtitle: 'Meet at the pickup point' },
   in_progress: { title: 'Ride in progress', subtitle: 'Enjoy your ride' },
 } as const;
 
@@ -191,7 +191,7 @@ export function TrackingScreenView() {
           <View style={[styles.arrivedBanner, { backgroundColor: theme.colors.successSubtle }]}>
             <Ionicons name="checkmark-circle" size={20} color={theme.colors.success} />
             <Text variant="bodySm" tone="secondary" style={styles.arrivedText}>
-              Your driver is waiting at {pickup.title}.
+              Your captain is waiting at {pickup.title}.
             </Text>
           </View>
         ) : null}
