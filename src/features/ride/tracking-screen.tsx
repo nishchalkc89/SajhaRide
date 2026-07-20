@@ -24,8 +24,10 @@ import { useTheme } from '@/theme';
 
 import { DriverCard } from './components/driver-card';
 
-/** Driver reaches the pickup this long after assignment. */
+/** Captain reaches the pickup this long after assignment. */
 const ARRIVE_AFTER_MS = 4000;
+/** Ride auto-starts (captain verifies the PIN) this long after arrival. */
+const START_AFTER_MS = 6000;
 /** Trip auto-completes this long after it starts. */
 const TRIP_DURATION_MS = 12000;
 
@@ -199,7 +201,7 @@ export function TrackingScreenView() {
           <View style={[styles.arrivedBanner, { backgroundColor: theme.colors.successSubtle }]}>
             <Ionicons name="checkmark-circle" size={20} color={theme.colors.success} />
             <Text variant="bodySm" tone="secondary" style={styles.arrivedText}>
-              Your captain is waiting at {pickup.title}.
+              Share the PIN — your ride starts once the captain enters it.
             </Text>
           </View>
         ) : null}
@@ -225,13 +227,7 @@ export function TrackingScreenView() {
 
         {/* Actions */}
         <View style={styles.actions}>
-          {isArrived ? (
-            <Button
-              label="Start Ride"
-              onPress={() => setStage('in_progress')}
-              trailingIcon={<Ionicons name="arrow-forward" size={18} color={theme.colors.onPrimary} />}
-            />
-          ) : inProgress ? (
+          {inProgress ? (
             <View style={styles.onRideActions}>
               <OnRideAction
                 icon="call"

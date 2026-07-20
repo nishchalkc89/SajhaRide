@@ -36,6 +36,8 @@ export type RideRequest = {
   riderName: string;
   riderRating: number;
   riderRides: number;
+  /** The captain's current location (start of the navigation to pickup). */
+  captainCoord: LatLng;
   pickupTitle: string;
   pickupAddress: string;
   pickupCoord: LatLng;
