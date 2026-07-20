@@ -272,12 +272,58 @@ export function TrackingScreenView() {
   );
 }
 
+/** One of the three "On Ride" bottom actions (Call / Chat / Share). */
+function OnRideAction({
+  icon,
+  label,
+  theme,
+  onPress,
+}: {
+  icon: keyof typeof Ionicons.glyphMap;
+  label: string;
+  theme: ReturnType<typeof useTheme>;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      style={[styles.onRideAction, { borderColor: theme.colors.border }]}>
+      <Ionicons name={icon} size={20} color={theme.colors.text} />
+      <Text variant="caption" tone="secondary">
+        {label}
+      </Text>
+    </Pressable>
+  );
+}
+
 const styles = StyleSheet.create({
   root: { flex: 1 },
   center: { alignItems: 'center', justifyContent: 'center' },
   mapArea: { flex: 1 },
   header: { position: 'absolute', top: 0, left: 0, right: 0, paddingHorizontal: 20 },
   headerCard: { padding: 14, borderRadius: 16, gap: 2 },
+  onRideBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 16,
+  },
+  sosBtn: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8 },
+  sosText: { color: '#fff', fontWeight: '700' },
+  onRideActions: { flexDirection: 'row', gap: 12 },
+  onRideAction: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 14,
+    borderRadius: 12,
+    borderWidth: StyleSheet.hairlineWidth * 2,
+  },
   sheet: { paddingTop: 8, paddingHorizontal: 20 },
   handle: { width: 40, height: 4, borderRadius: 2, alignSelf: 'center', marginBottom: 16 },
   stats: {
