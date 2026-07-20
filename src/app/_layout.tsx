@@ -23,6 +23,7 @@ import { StyleSheet } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { DesktopFrame } from '@/components/layout/desktop-frame';
 import { ToastHost } from '@/components/ui/toast-host';
 import { ThemeProvider } from '@/theme/theme-provider';
 
@@ -60,16 +61,19 @@ export default function RootLayout() {
       <SafeAreaProvider>
         <QueryClientProvider client={queryClient}>
           <ThemeProvider>
-            <Stack
-              screenOptions={{
-                // Every screen in this app draws its own chrome; the native
-                // header is never used.
-                headerShown: false,
-                animation: 'fade',
-              }}
-            />
-            {/* Global toast layer, above every screen. */}
-            <ToastHost />
+            {/* Frames the app as a centered phone on desktop; no-op on mobile. */}
+            <DesktopFrame>
+              <Stack
+                screenOptions={{
+                  // Every screen in this app draws its own chrome; the native
+                  // header is never used.
+                  headerShown: false,
+                  animation: 'fade',
+                }}
+              />
+              {/* Global toast layer, above every screen. */}
+              <ToastHost />
+            </DesktopFrame>
           </ThemeProvider>
         </QueryClientProvider>
       </SafeAreaProvider>
