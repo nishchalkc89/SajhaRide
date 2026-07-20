@@ -8,7 +8,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { RideMap } from '@/components/map/ride-map';
@@ -16,7 +16,9 @@ import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { useDriveSimulation } from '@/hooks/use-drive-simulation';
 import { useCaptainStore } from '@/store/captain-store';
+import { toast } from '@/store/toast-store';
 import { useTheme } from '@/theme';
+import { openGoogleNavigation } from '@/utils/external-nav';
 
 import { ContactRow } from './components/route-card';
 import { CaptainRideGuard } from './components/ride-guard';
@@ -78,6 +80,16 @@ export function CaptainRideScreenView() {
               Ride Started
             </Text>
           </View>
+
+          <Pressable
+            onPress={() => {
+              toast('Opening Google Maps navigation…');
+              openGoogleNavigation(request.dropCoord, request.pickupCoord);
+            }}
+            accessibilityLabel="Open in Google Maps"
+            style={[styles.navFab, { backgroundColor: theme.colors.primary }, theme.elevation.md]}>
+            <Ionicons name="navigate" size={20} color={theme.colors.onPrimary} />
+          </Pressable>
         </RideMap>
       </View>
 
@@ -161,6 +173,7 @@ const styles = StyleSheet.create({
     borderRadius: 999,
   },
   pillText: { color: '#fff', fontWeight: '600' },
+  navFab: { position: 'absolute', right: 16, bottom: 12, width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center' },
   sheet: { paddingTop: 8, paddingHorizontal: 20 },
   handle: { width: 40, height: 4, borderRadius: 2, alignSelf: 'center', marginBottom: 16 },
   goingRow: { marginBottom: 16 },

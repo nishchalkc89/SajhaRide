@@ -27,7 +27,8 @@ export function ReceiptScreenView() {
   const pickup = useRideStore((s) => s.pickup);
   const destination = useRideStore((s) => s.destination);
   const vehicle = useRideStore((s) => s.vehicle);
-  const fare = useMemo(() => computeFareBreakdown(vehicle), [vehicle]);
+  const distanceKm = useRideStore((s) => s.distanceKm);
+  const fare = useMemo(() => computeFareBreakdown(vehicle, distanceKm), [vehicle, distanceKm]);
 
   const lineItems = [
     { label: 'Base Fare', value: fare.base },

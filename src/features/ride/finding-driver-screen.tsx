@@ -33,7 +33,7 @@ export function FindingDriverScreenView() {
 
   const pickup = useRideStore((s) => s.pickup);
   const destination = useRideStore((s) => s.destination);
-  const vehicle = useRideStore((s) => s.vehicle);
+  const fare = useRideStore((s) => s.currentFare());
   const assignDriver = useRideStore((s) => s.assignDriver);
 
   // After the search window, match the driver and hand off to tracking.
@@ -174,7 +174,7 @@ export function FindingDriverScreenView() {
                 {destination?.title ?? 'Destination'}
               </Text>
               <Text variant="bodyLg" style={styles.rideFare}>
-                NPR {vehicle.fare}
+                NPR {fare}
               </Text>
             </View>
           </View>

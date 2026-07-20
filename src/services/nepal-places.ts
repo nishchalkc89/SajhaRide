@@ -152,11 +152,16 @@ type NominatimRow = {
 };
 
 function toNamedPlace(row: NominatimRow): NamedPlace {
-  const a = row.address ?? {};
-  // Prefer the specific name; fall back to the first display_name segment.
-  const primary = row.name || row.display_name.split(',')[0];
-  const locality = a.city || a.town || a.village || a.municipality || a.county || a.state_district || a.state;
-  const subtitle = locality && locality !== primary ? locality : row.display_name.split(',').slice(1, 3).join(',').trim();
+  // Prefer the specific name as the title; show the FULL address underneath so
+  // every result carries detail (street, ward, city, district, province…),
+  // not just the headline place name.
+  const segments = row.display_name.split(',').map((s) => s.trim());
+  const primary = row.name || segments[0];
+
+  // Drop a leading segment that just repeats the title, and Nepal's country
+  // suffix, then rejoin the rest as the detailed address line.
+  const rest = segments.filter((s, i) => !(i === 0 && s === primary) && s !== 'Nepal' && s !== 'नेपाल');
+  const subtitle = rest.join(', ');
 
   return {
     id: `osm-${row.place_id}`,

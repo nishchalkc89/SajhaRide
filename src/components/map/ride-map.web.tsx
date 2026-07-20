@@ -24,21 +24,28 @@ const DEFAULT_CENTER: LatLng = { latitude: 27.7017, longitude: 85.3206 };
 
 const fmt = (p: LatLng) => `${p.latitude},${p.longitude}`;
 
-/** Build a keyless Google Maps embed URL for the given ride state. */
+/**
+ * Build a keyless Google Maps embed URL for the given ride state.
+ *
+ * IMPORTANT: the src must be STABLE across position updates — the iframe reloads
+ * whenever the URL changes, so we never feed the moving `follow` point into it
+ * (that blanks the map). Navigation uses the fixed pickup→destination route and
+ * lets the overlaid bike marker convey movement.
+ */
 function buildGoogleUrl(
   pickup: LatLng | undefined,
   destination: LatLng | undefined,
   driver: LatLng | undefined,
   showRoute: boolean | undefined,
-  follow: LatLng | undefined
+  navigating: boolean
 ): string {
-  // Navigation: keep the moving vehicle centred and zoomed in.
-  if (follow) {
-    return `https://maps.google.com/maps?q=${fmt(follow)}&z=17&output=embed`;
-  }
-  // Route view: Google Directions between pickup and destination.
-  if (showRoute && pickup && destination) {
+  // Navigation / route view: Google Directions between pickup and destination.
+  if ((navigating || showRoute) && pickup && destination) {
     return `https://maps.google.com/maps?saddr=${fmt(pickup)}&daddr=${fmt(destination)}&z=14&output=embed`;
+  }
+  // Navigating with only one point → centre on it (still stable).
+  if (navigating && (pickup || destination)) {
+    return `https://maps.google.com/maps?q=${fmt((pickup ?? destination) as LatLng)}&z=16&output=embed`;
   }
   // Otherwise centre on the driver (if tracking) then pickup then default.
   const center = driver ?? pickup ?? DEFAULT_CENTER;
@@ -55,7 +62,7 @@ export function RideMap({
   children,
 }: RideMapProps) {
   const theme = useTheme();
-  const src = buildGoogleUrl(pickup, destination, driverLocation, showRoute, follow);
+  const src = buildGoogleUrl(pickup, destination, driverLocation, showRoute, !!follow);
 
   return (
     <View style={[styles.root, style]}>

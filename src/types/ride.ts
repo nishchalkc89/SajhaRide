@@ -23,8 +23,14 @@ export type Vehicle = {
   id: VehicleId;
   name: string;
   tagline: string;
-  /** Fare in NPR. */
+  /** Example fare shown before a destination is picked. */
   fare: number;
+  /** Flag-down fare in NPR. */
+  baseFare: number;
+  /** Per-kilometre rate in NPR. */
+  perKm: number;
+  /** Minimum fare regardless of distance. */
+  minFare: number;
   etaMinutes: number;
   capacity: number;
   /** Ionicons glyph name representing the vehicle (fallback / map marker). */

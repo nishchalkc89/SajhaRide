@@ -31,7 +31,7 @@ export function PlaceRow({
           {place.title}
         </Text>
         {place.subtitle ? (
-          <Text variant="bodySm" tone="tertiary" numberOfLines={1}>
+          <Text variant="bodySm" tone="tertiary" numberOfLines={2}>
             {place.subtitle}
           </Text>
         ) : null}

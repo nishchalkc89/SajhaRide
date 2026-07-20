@@ -32,7 +32,7 @@ export function RideCompletedScreenView() {
   const insets = useSafeAreaInsets();
   const haptic = useHaptics();
 
-  const vehicle = useRideStore((s) => s.vehicle);
+  const fare = useRideStore((s) => s.currentFare());
   const driver = useRideStore((s) => s.driver);
   const setRating = useRideStore((s) => s.setRating);
 
@@ -43,7 +43,7 @@ export function RideCompletedScreenView() {
   // Simulate scanning the captain's QR: the fare (+ any tip) lands in the
   // captain's wallet. On a real device this is the phone's bank/UPI scanner.
   const payViaQr = () => {
-    const total = vehicle.fare + (tip ?? 0);
+    const total = fare + (tip ?? 0);
     useCaptainStore.getState().creditWallet(total);
     setPaid(true);
     haptic('success');
@@ -92,7 +92,7 @@ export function RideCompletedScreenView() {
         {/* Fare card */}
         <View style={[styles.card, { backgroundColor: theme.colors.surface }, theme.elevation.sm]}>
           <View style={styles.fareRow}>
-            <Text variant="h2">NPR {vehicle.fare}</Text>
+            <Text variant="h2">NPR {fare}</Text>
             {paid ? (
               <View style={[styles.paidBadge, { backgroundColor: theme.colors.successSubtle }]}>
                 <Ionicons name="checkmark-circle" size={14} color={theme.colors.success} />
@@ -117,7 +117,7 @@ export function RideCompletedScreenView() {
             </View>
           ) : (
             <Button
-              label={`Scan & Pay NPR ${vehicle.fare}`}
+              label={`Scan & Pay NPR ${fare}`}
               onPress={payViaQr}
               leadingIcon={<Ionicons name="qr-code" size={18} color={theme.colors.onPrimary} />}
               style={styles.payBtn}

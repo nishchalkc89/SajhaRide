@@ -14,10 +14,13 @@ import type { Vehicle } from '@/types/ride';
 
 export function VehicleCard({
   vehicle,
+  fare,
   selected,
   onPress,
 }: {
   vehicle: Vehicle;
+  /** Distance-based fare for this vehicle on the current trip. */
+  fare: number;
   selected: boolean;
   onPress: () => void;
 }) {
@@ -28,7 +31,7 @@ export function VehicleCard({
     <Pressable
       accessibilityRole="radio"
       accessibilityState={{ selected }}
-      accessibilityLabel={`${vehicle.name}, NPR ${vehicle.fare}`}
+      accessibilityLabel={`${vehicle.name}, NPR ${fare}`}
       onPress={() => {
         haptic('light');
         onPress();
@@ -76,7 +79,7 @@ export function VehicleCard({
 
       <View style={styles.fareCol}>
         <Text variant="bodyLg" style={styles.fare}>
-          NPR {vehicle.fare}
+          NPR {fare}
         </Text>
         <View
           style={[

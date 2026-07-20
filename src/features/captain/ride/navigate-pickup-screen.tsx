@@ -13,6 +13,7 @@ import { Text } from '@/components/ui/text';
 import { useCaptainStore } from '@/store/captain-store';
 import { toast } from '@/store/toast-store';
 import { useTheme } from '@/theme';
+import { openGoogleNavigation } from '@/utils/external-nav';
 
 import { ContactRow } from './components/route-card';
 import { CaptainRideGuard } from './components/ride-guard';
@@ -75,7 +76,10 @@ export function NavigateToPickupScreenView() {
             size="md"
             fullWidth={false}
             variant="secondary"
-            onPress={() => toast('Opening turn-by-turn navigation…')}
+            onPress={() => {
+              toast('Opening Google Maps navigation…');
+              openGoogleNavigation(request.pickupCoord);
+            }}
             leadingIcon={<Ionicons name="navigate" size={16} color={theme.colors.text} />}
           />
         </View>

@@ -2,7 +2,8 @@
  * Ride session state — the single source of truth for the booking flow.
  *
  * Not persisted: a ride is ephemeral. Screens read pickup/destination/vehicle
- * and drive `stage` forward. Fare is derived from the selected vehicle.
+ * and drive `stage` forward. Fare is DISTANCE-BASED: derived from the road
+ * distance between pickup and destination and the selected vehicle's rate card.
  */
 
 import { create } from 'zustand';
@@ -17,11 +18,14 @@ import type {
   Vehicle,
   VehicleId,
 } from '@/types/ride';
+import { roadDistanceKm } from '@/utils/geo';
 
 type RideState = {
   pickup: NamedPlace;
   destination: NamedPlace | null;
   vehicle: Vehicle;
+  /** Road distance pickup→destination in km (0 until a destination is set). */
+  distanceKm: number;
   stage: RideStage;
   driver: Driver | null;
   paymentMethod: PaymentMethod;
@@ -36,38 +40,61 @@ type RideState = {
   setStage: (stage: RideStage) => void;
   assignDriver: () => void;
   setRating: (rating: number) => void;
+  /** Fare for the current trip with the selected vehicle. */
+  currentFare: () => number;
   fareBreakdown: () => FareBreakdown;
   reset: () => void;
 };
 
 const DEFAULT_VEHICLE = VEHICLES.find((v) => v.recommended) ?? VEHICLES[0];
 
+/** Estimated trip minutes from distance (≈22 km/h average city speed). */
+export function estimateMinutes(km: number): number {
+  return Math.max(3, Math.round((km / 22) * 60));
+}
+
 /**
- * Pure fare breakdown from a vehicle's headline fare. Kept standalone so screens
- * can `useMemo` it — calling it inside a Zustand selector would allocate a new
- * object every render and trip the "getSnapshot should be cached" loop.
+ * Distance-based fare: flag-down + per-km, floored at the vehicle's minimum.
+ * Rounded to the nearest NPR 5. Pure, so screens can `useMemo` it safely.
  */
-export function computeFareBreakdown(vehicle: Vehicle): FareBreakdown {
-  const base = 50;
-  const remainder = Math.max(0, vehicle.fare - base);
-  const distance = Math.round(remainder * 0.8);
-  const time = vehicle.fare - base - distance;
-  return { base, distance, time, total: vehicle.fare, distanceKm: 3.2, durationMin: 10 };
+export function computeFare(vehicle: Vehicle, km: number): number {
+  if (km <= 0) return vehicle.minFare;
+  const raw = vehicle.baseFare + vehicle.perKm * km;
+  const rounded = Math.round(raw / 5) * 5;
+  return Math.max(vehicle.minFare, rounded);
+}
+
+/** Itemised breakdown from the vehicle + distance. */
+export function computeFareBreakdown(vehicle: Vehicle, km: number): FareBreakdown {
+  const distanceKm = km > 0 ? Math.round(km * 10) / 10 : 0;
+  const total = computeFare(vehicle, distanceKm);
+  const durationMin = estimateMinutes(distanceKm);
+  const distanceCharge = Math.round(vehicle.perKm * distanceKm);
+  const base = vehicle.baseFare;
+  // Any rounding/minimum adjustment lands in a small "time & surge" line.
+  const time = Math.max(0, total - base - distanceCharge);
+  return { base, distance: distanceCharge, time, total, distanceKm, durationMin };
 }
 
 export const useRideStore = create<RideState>((set, get) => ({
   pickup: CURRENT_PICKUP,
   destination: null,
   vehicle: DEFAULT_VEHICLE,
+  distanceKm: 0,
   stage: 'idle',
   driver: null,
   paymentMethod: 'cash',
   rating: 0,
-  // Fixed per-rider PIN (like Rapido's Rapid PIN): easy to recall + share.
   ridePin: '4 2 4 2',
 
-  setPickup: (pickup) => set({ pickup }),
-  setDestination: (destination) => set({ destination }),
+  setPickup: (pickup) => {
+    const { destination } = get();
+    set({ pickup, distanceKm: destination ? roadDistanceKm(pickup.coordinate, destination.coordinate) : 0 });
+  },
+  setDestination: (destination) => {
+    const { pickup } = get();
+    set({ destination, distanceKm: destination ? roadDistanceKm(pickup.coordinate, destination.coordinate) : 0 });
+  },
   selectVehicle: (id) => {
     const vehicle = VEHICLES.find((v) => v.id === id);
     if (vehicle) set({ vehicle });
@@ -77,12 +104,14 @@ export const useRideStore = create<RideState>((set, get) => ({
   assignDriver: () => set({ driver: DEMO_DRIVER, stage: 'assigned' }),
   setRating: (rating) => set({ rating }),
 
-  fareBreakdown: () => computeFareBreakdown(get().vehicle),
+  currentFare: () => computeFare(get().vehicle, get().distanceKm),
+  fareBreakdown: () => computeFareBreakdown(get().vehicle, get().distanceKm),
 
   reset: () =>
     set({
       destination: null,
       vehicle: DEFAULT_VEHICLE,
+      distanceKm: 0,
       stage: 'idle',
       driver: null,
       rating: 0,

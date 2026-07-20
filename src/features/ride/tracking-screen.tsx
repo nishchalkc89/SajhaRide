@@ -18,7 +18,7 @@ import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { useDriveSimulation } from '@/hooks/use-drive-simulation';
 import { NEARBY_VEHICLES } from '@/services/mock-data';
-import { useRideStore } from '@/store/ride-store';
+import { estimateMinutes, useRideStore } from '@/store/ride-store';
 import { toast } from '@/store/toast-store';
 import { useTheme } from '@/theme';
 
@@ -42,7 +42,8 @@ export function TrackingScreenView() {
 
   const pickup = useRideStore((s) => s.pickup);
   const destination = useRideStore((s) => s.destination);
-  const vehicle = useRideStore((s) => s.vehicle);
+  const distanceKm = useRideStore((s) => s.distanceKm);
+  const fare = useRideStore((s) => s.currentFare());
   const driver = useRideStore((s) => s.driver);
   const stage = useRideStore((s) => s.stage);
   const setStage = useRideStore((s) => s.setStage);
@@ -60,7 +61,7 @@ export function TrackingScreenView() {
     if (stage !== 'in_progress') return;
     const id = setTimeout(() => {
       setStage('completed');
-      router.replace('/ride-completed');
+      router.replace('/payment');
     }, TRIP_DURATION_MS);
     return () => clearTimeout(id);
   }, [stage, setStage, router]);
@@ -103,12 +104,30 @@ export function TrackingScreenView() {
           showRoute={!inProgress}
           follow={inProgress ? bikePosition : undefined}>
           <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
-            <View style={[styles.headerCard, { backgroundColor: theme.colors.surface }, theme.elevation.md]}>
-              <Text variant="h3">{copy.title}</Text>
-              <Text variant="bodySm" tone="secondary">
-                {copy.subtitle}
-              </Text>
-            </View>
+            {inProgress ? (
+              // On Ride — dark header with an SOS button.
+              <View style={[styles.onRideBar, { backgroundColor: theme.colors.text }, theme.elevation.md]}>
+                <Ionicons name="radio-button-on" size={16} color={theme.colors.success} />
+                <Text variant="h3" style={{ color: theme.colors.background }}>
+                  On Ride
+                </Text>
+                <Pressable
+                  onPress={() => toast('SOS alert sent to emergency contacts', 'error')}
+                  accessibilityLabel="SOS"
+                  style={[styles.sosBtn, { backgroundColor: theme.colors.danger }]}>
+                  <Text variant="caption" style={styles.sosText}>
+                    SOS
+                  </Text>
+                </Pressable>
+              </View>
+            ) : (
+              <View style={[styles.headerCard, { backgroundColor: theme.colors.surface }, theme.elevation.md]}>
+                <Text variant="h3">{copy.title}</Text>
+                <Text variant="bodySm" tone="secondary">
+                  {copy.subtitle}
+                </Text>
+              </View>
+            )}
           </View>
         </RideMap>
       </View>
@@ -131,14 +150,14 @@ export function TrackingScreenView() {
         {inProgress ? (
           <View style={[styles.stats, { borderColor: theme.colors.border }]}>
             <View style={styles.stat}>
-              <Text variant="h3">10 min</Text>
+              <Text variant="h3">{estimateMinutes(distanceKm)} min</Text>
               <Text variant="caption" tone="tertiary">
-                Distance Left
+                Time Left
               </Text>
             </View>
             <View style={[styles.statDivider, { backgroundColor: theme.colors.border }]} />
             <View style={styles.stat}>
-              <Text variant="h3">3.2 km</Text>
+              <Text variant="h3">{distanceKm.toFixed(1)} km</Text>
               <Text variant="caption" tone="tertiary">
                 Remaining
               </Text>
@@ -191,7 +210,7 @@ export function TrackingScreenView() {
               {destination?.title ?? 'Destination'}
             </Text>
             <Text variant="bodyLg" style={styles.rideFare}>
-              NPR {vehicle.fare}
+              NPR {fare}
             </Text>
           </View>
         </View>

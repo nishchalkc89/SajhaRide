@@ -16,8 +16,8 @@ import { RideMap } from '@/components/map/ride-map';
 import { Button } from '@/components/ui/button';
 import { ScreenHeader } from '@/components/ui/screen-header';
 import { Text } from '@/components/ui/text';
-import { CURRENT_PICKUP, NEARBY_VEHICLES, VEHICLES } from '@/services/mock-data';
-import { useRideStore } from '@/store/ride-store';
+import { NEARBY_VEHICLES, VEHICLES } from '@/services/mock-data';
+import { computeFare, estimateMinutes, useRideStore } from '@/store/ride-store';
 import { useTheme } from '@/theme';
 
 import { VehicleCard } from './components/vehicle-card';
@@ -29,9 +29,13 @@ export function ChooseRideScreenView() {
 
   const pickup = useRideStore((s) => s.pickup);
   const destination = useRideStore((s) => s.destination);
+  const distanceKm = useRideStore((s) => s.distanceKm);
   const selected = useRideStore((s) => s.vehicle);
   const selectVehicle = useRideStore((s) => s.selectVehicle);
   const setStage = useRideStore((s) => s.setStage);
+
+  const selectedFare = computeFare(selected, distanceKm);
+  const tripMinutes = estimateMinutes(distanceKm);
 
   const confirm = () => {
     setStage('searching');
@@ -68,12 +72,19 @@ export function ChooseRideScreenView() {
         ]}>
         <View style={[styles.handle, { backgroundColor: theme.colors.border }]} />
 
-        {/* Route summary */}
+        {/* Route summary + trip distance */}
         <View style={styles.routeSummary}>
           <Ionicons name="navigate" size={16} color={theme.colors.primary} />
           <Text variant="bodySm" tone="secondary" numberOfLines={1} style={styles.routeText}>
             {pickup.title} → {destination?.title ?? 'destination'}
           </Text>
+          {distanceKm > 0 ? (
+            <View style={[styles.distTag, { backgroundColor: theme.colors.surfaceMuted }]}>
+              <Text variant="caption" tone="secondary">
+                {distanceKm.toFixed(1)} km · {tripMinutes} min
+              </Text>
+            </View>
+          ) : null}
         </View>
 
         {/* Offer banner */}
@@ -92,6 +103,7 @@ export function ChooseRideScreenView() {
             <VehicleCard
               key={v.id}
               vehicle={v}
+              fare={computeFare(v, distanceKm)}
               selected={selected.id === v.id}
               onPress={() => selectVehicle(v.id)}
             />
@@ -112,7 +124,7 @@ export function ChooseRideScreenView() {
             <Text variant="caption" tone="tertiary">
               Estimated Fare
             </Text>
-            <Text variant="h3">NPR {selected.fare}</Text>
+            <Text variant="h3">NPR {selectedFare}</Text>
           </View>
           <Button
             label={`Confirm ${selected.name}`}
@@ -150,6 +162,7 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
   },
   routeText: { flex: 1 },
+  distTag: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999 },
   offer: {
     flexDirection: 'row',
     alignItems: 'center',
