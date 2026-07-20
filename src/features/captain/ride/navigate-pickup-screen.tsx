@@ -38,8 +38,8 @@ export function NavigateToPickupScreenView() {
       <StatusBar style={theme.scheme === 'dark' ? 'light' : 'dark'} />
 
       <View style={styles.mapArea}>
-        {/* Follow the captain toward the pickup. */}
-        <RideMap pickup={request.pickupCoord} follow={request.pickupCoord}>
+        {/* Google directions from the captain's location to the pickup. */}
+        <RideMap pickup={request.captainCoord} destination={request.pickupCoord} showRoute>
           <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
             <View style={[styles.navPill, { backgroundColor: theme.colors.primary }, theme.elevation.md]}>
               <Ionicons name="navigate" size={16} color={theme.colors.onPrimary} />
@@ -78,7 +78,7 @@ export function NavigateToPickupScreenView() {
             variant="secondary"
             onPress={() => {
               toast('Opening Google Maps navigation…');
-              openGoogleNavigation(request.pickupCoord);
+              openGoogleNavigation(request.pickupCoord, request.captainCoord);
             }}
             leadingIcon={<Ionicons name="navigate" size={16} color={theme.colors.text} />}
           />

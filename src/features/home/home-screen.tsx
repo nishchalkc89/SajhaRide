@@ -10,7 +10,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useCallback, useEffect, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { Image, Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { LogoMark } from '@/components/brand/logo-mark';
@@ -104,6 +104,35 @@ export function HomeScreenView() {
             icon="notifications-outline"
             onPress={() => toast('You have no new notifications')}
           />
+        </View>
+
+        {/* Vehicle quick-select (Bike / Auto) */}
+        <View style={[styles.section, styles.vehicleRow]}>
+          {VEHICLES.map((v) => {
+            const active = selectedVehicle.id === v.id;
+            return (
+              <Pressable
+                key={v.id}
+                onPress={() => {
+                  selectVehicle(v.id);
+                  router.push('/select-destination');
+                }}
+                accessibilityRole="button"
+                accessibilityLabel={`Book ${v.name}`}
+                style={[
+                  styles.vehicleChip,
+                  {
+                    borderColor: active ? theme.colors.primary : theme.colors.border,
+                    backgroundColor: active ? theme.colors.primarySubtle : theme.colors.surface,
+                  },
+                ]}>
+                <Image source={v.image} style={styles.vehicleImg} resizeMode="contain" />
+                <Text variant="bodyLg" style={styles.vehicleName}>
+                  {v.name}
+                </Text>
+              </Pressable>
+            );
+          })}
         </View>
 
         {/* Where-to card */}
