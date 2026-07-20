@@ -43,7 +43,9 @@ const TAGLINE_OPACITY = 0.75;
 export function SplashScreenView() {
   const theme = useTheme();
   const router = useRouter();
-  const { width } = useWindowDimensions();
+  // Clamp to the phone-frame width so the skyline doesn't over-scale on desktop.
+  const { width: rawWidth } = useWindowDimensions();
+  const width = Math.min(rawWidth, 460);
 
   // --- Shared values -------------------------------------------------------
   // Each declares origin → destination; `entranceFrom` collapses to the
