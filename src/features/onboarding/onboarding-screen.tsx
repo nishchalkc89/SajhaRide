@@ -37,13 +37,16 @@ export function OnboardingScreenView() {
   const theme = useTheme();
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { width } = useWindowDimensions();
+  const { width: windowWidth } = useWindowDimensions();
   const triggerHaptic = useHaptics();
   const completeOnboarding = useOnboardingStore((s) => s.complete);
 
   const scrollRef = useRef<Animated.ScrollView>(null);
   const scrollX = useSharedValue(0);
   const [index, setIndex] = useState(0);
+  // Page width is the pager's OWN width (not the window), so the carousel works
+  // inside the desktop phone-frame. Seeded from the window, refined on layout.
+  const [width, setWidth] = useState(windowWidth);
 
   const isLast = index === SLIDES.length - 1;
 
@@ -112,6 +115,10 @@ export function OnboardingScreenView() {
         // the plain JS handler keeps the index (and therefore the dots) alive.
         onScroll={CAN_ANIMATE ? onAnimatedScroll : syncIndex}
         onMomentumScrollEnd={syncIndex}
+        onLayout={(e) => {
+          const w = e.nativeEvent.layout.width;
+          if (w > 0 && Math.abs(w - width) > 1) setWidth(w);
+        }}
         scrollEventThrottle={16}
         bounces={false}
         style={styles.pager}>
