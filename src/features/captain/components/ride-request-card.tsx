@@ -5,7 +5,7 @@
 
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useRef, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
@@ -126,8 +126,16 @@ export function RideRequestCard({
 
       {/* Actions */}
       <View style={styles.actions}>
-        <Button label="Decline" variant="danger" fullWidth={false} style={styles.action} onPress={onDecline} />
-        <Button label="Accept" fullWidth={false} style={styles.action} onPress={onAccept} />
+        <Pressable
+          onPress={onDecline}
+          accessibilityRole="button"
+          accessibilityLabel="Decline"
+          style={[styles.declineBtn, { borderColor: theme.colors.danger }]}>
+          <Text variant="label" tone="danger">
+            Decline
+          </Text>
+        </Pressable>
+        <Button label="Accept" fullWidth={false} style={styles.acceptBtn} onPress={onAccept} />
       </View>
     </View>
   );
@@ -150,5 +158,13 @@ const styles = StyleSheet.create({
   metaItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   vehicleTag: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999 },
   actions: { flexDirection: 'row', gap: 12, marginTop: 18 },
-  action: { flex: 1 },
+  declineBtn: {
+    flex: 1,
+    height: 54,
+    borderRadius: 14,
+    borderWidth: 1.5,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  acceptBtn: { flex: 1.4 },
 });

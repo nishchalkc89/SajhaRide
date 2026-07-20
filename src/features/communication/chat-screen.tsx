@@ -111,18 +111,23 @@ export function ChatScreenView() {
         </ScrollView>
 
         {/* Quick replies */}
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.quickRow}>
-          {QUICK_REPLIES.map((q) => (
-            <Pressable
-              key={q}
-              onPress={() => send(q)}
-              style={[styles.quickChip, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
-              <Text variant="bodySm" tone="secondary">
-                {q}
-              </Text>
-            </Pressable>
-          ))}
-        </ScrollView>
+        <View style={styles.quickWrap}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.quickRow}>
+            {QUICK_REPLIES.map((q) => (
+              <Pressable
+                key={q}
+                onPress={() => send(q)}
+                style={[styles.quickChip, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
+                <Text variant="bodySm" tone="secondary">
+                  {q}
+                </Text>
+              </Pressable>
+            ))}
+          </ScrollView>
+        </View>
 
         {/* Composer */}
         <View style={[styles.composer, { paddingBottom: insets.bottom + 10, borderTopColor: theme.colors.border }]}>
@@ -165,8 +170,15 @@ const styles = StyleSheet.create({
   callBtn: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
   messages: { padding: 16, gap: 8 },
   bubble: { maxWidth: '78%', paddingHorizontal: 14, paddingVertical: 10, borderRadius: 16 },
-  quickRow: { paddingHorizontal: 12, gap: 8, paddingVertical: 8 },
-  quickChip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 999, borderWidth: StyleSheet.hairlineWidth * 2 },
+  quickWrap: { height: 52, justifyContent: 'center' },
+  quickRow: { paddingHorizontal: 12, gap: 8, alignItems: 'center' },
+  quickChip: {
+    height: 36,
+    justifyContent: 'center',
+    paddingHorizontal: 14,
+    borderRadius: 18,
+    borderWidth: StyleSheet.hairlineWidth * 2,
+  },
   composer: {
     flexDirection: 'row',
     alignItems: 'center',

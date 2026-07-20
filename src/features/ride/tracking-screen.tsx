@@ -49,10 +49,18 @@ export function TrackingScreenView() {
   const setStage = useRideStore((s) => s.setStage);
   const ridePin = useRideStore((s) => s.ridePin);
 
-  // assigned → arrived (driver reaches pickup).
+  // assigned → arrived (captain reaches pickup).
   useEffect(() => {
     if (stage !== 'assigned') return;
     const id = setTimeout(() => setStage('arrived'), ARRIVE_AFTER_MS);
+    return () => clearTimeout(id);
+  }, [stage, setStage]);
+
+  // arrived → in_progress. The rider never taps "start" — the ride begins when
+  // the captain verifies the shared PIN. We simulate that automatically here.
+  useEffect(() => {
+    if (stage !== 'arrived') return;
+    const id = setTimeout(() => setStage('in_progress'), START_AFTER_MS);
     return () => clearTimeout(id);
   }, [stage, setStage]);
 
