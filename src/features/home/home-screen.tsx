@@ -22,6 +22,7 @@ import {
   NEARBY_VEHICLES,
   RECENT_SEARCHES,
   SAVED_PLACES,
+  VEHICLES,
 } from '@/services/mock-data';
 import { useRideStore } from '@/store/ride-store';
 import { toast } from '@/store/toast-store';
@@ -44,6 +45,8 @@ export function HomeScreenView() {
   const setDestination = useRideStore((s) => s.setDestination);
   const setPickup = useRideStore((s) => s.setPickup);
   const setStage = useRideStore((s) => s.setStage);
+  const selectedVehicle = useRideStore((s) => s.vehicle);
+  const selectVehicle = useRideStore((s) => s.selectVehicle);
   const { fetchLocation } = useCurrentLocation();
 
   // Recent searches are local so "Clear All" can empty them in-session.
@@ -268,6 +271,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     marginTop: 20,
   },
+  vehicleRow: { flexDirection: 'row', gap: 12, marginTop: 16 },
+  vehicleChip: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 14,
+    borderWidth: 1.5,
+  },
+  vehicleImg: { width: 40, height: 40 },
+  vehicleName: { fontWeight: '600' },
   mapWrap: {
     marginHorizontal: 20,
     marginTop: 16,
