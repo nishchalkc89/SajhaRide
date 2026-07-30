@@ -74,12 +74,15 @@ export function SelectDestinationScreenView() {
     };
   }, [query]);
 
-  // Merge local + remote, de-duplicating by rounded coordinate/title.
+  // Merge local + remote, de-duplicating by what's actually shown — Nominatim
+  // often returns multiple records (e.g. a municipality + a place node) for
+  // the same named location with slightly different coordinates, which would
+  // otherwise render as visually-identical duplicate rows.
   const results = useMemo(() => {
     const seen = new Set<string>();
     const out: NamedPlace[] = [];
     for (const p of [...local, ...remote]) {
-      const key = `${p.title.toLowerCase()}|${p.coordinate.latitude.toFixed(3)}`;
+      const key = `${p.title.toLowerCase()}|${(p.subtitle ?? '').toLowerCase()}`;
       if (seen.has(key)) continue;
       seen.add(key);
       out.push(p);

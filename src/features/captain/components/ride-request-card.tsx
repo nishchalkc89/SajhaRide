@@ -31,17 +31,17 @@ export function RideRequestCard({
 
   useEffect(() => {
     const id = setInterval(() => {
-      setSecondsLeft((s) => {
-        if (s <= 1) {
-          clearInterval(id);
-          declineRef.current();
-          return 0;
-        }
-        return s - 1;
-      });
+      setSecondsLeft((s) => (s > 0 ? s - 1 : 0));
     }, 1000);
     return () => clearInterval(id);
   }, []);
+
+  // Fire the decline as its own effect, not as a side effect of the state
+  // updater above — calling a store action from inside a functional setState
+  // update trips React's "update while rendering a different component" check.
+  useEffect(() => {
+    if (secondsLeft === 0) declineRef.current();
+  }, [secondsLeft]);
 
   return (
     <View

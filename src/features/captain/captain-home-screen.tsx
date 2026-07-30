@@ -41,6 +41,7 @@ export function CaptainHomeScreenView() {
   const goOffline = useCaptainStore((s) => s.goOffline);
   const receiveRequest = useCaptainStore((s) => s.receiveRequest);
   const declineRequest = useCaptainStore((s) => s.declineRequest);
+  const acceptRequest = useCaptainStore((s) => s.acceptRequest);
 
   const online = stage !== 'offline';
   const firstName = profile?.fullName?.split(' ')[0] ?? 'Captain';
@@ -165,6 +166,11 @@ export function CaptainHomeScreenView() {
               request={request}
               onAccept={() => {
                 haptic('success');
+                // Claim the request now — otherwise its 15s decision countdown
+                // keeps running in the background while the details screen is
+                // open, and can auto-decline the ride out from under the
+                // captain mid-review.
+                acceptRequest();
                 router.push('/captain/ride-details');
               }}
               onDecline={declineRequest}
