@@ -1,56 +1,57 @@
-# Welcome to your Expo app 👋
+# SajhaRide
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A ride-hailing app for Nepal, built with Expo + React Native. Two sides of one
+codebase: a **passenger** app (book a bike or auto, track your ride, pay) and
+a **captain** app (go online, accept requests, navigate, get paid) — sharing
+the same design system and running on iOS, Android, and web.
 
-## Get started
+## Stack
 
-1. Install dependencies
+- Expo SDK 57 / React Native 0.86 / React 19, file-based routing via Expo Router
+- NativeWind (Tailwind for RN) + a small custom theme system
+- Zustand stores, persisted with MMKV
+- `react-native-maps` on native; a keyless Google Maps embed on web
+- OpenStreetMap Nominatim for Nepal-wide place search
+- Distance-based fares (haversine distance, Bike/Auto rates)
 
-   ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+## Getting started
 
 ```bash
-npm run reset-project
+npm install
+npx expo start
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+This opens the Expo dev tools — from there, launch on Android, iOS, or web.
+A Google Maps API key is required for native maps; set
+`REPLACE_WITH_YOUR_GOOGLE_MAPS_API_KEY` in `app.json` under `ios.config` and
+`android.config.googleMaps`. The web build doesn't need a key.
 
-### Other setup steps
+## Trying it out
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+The app ships with demo data so the whole flow works without a real backend:
 
-## Learn more
+- **Passenger OTP**: `123456` (tap the on-screen hint to autofill)
+- **Captain start PIN**: `4242`, entered by the captain to begin a ride
 
-To learn more about developing your project with Expo, look at the following resources:
+From the role-select screen, choose **Join as a Passenger** to book a ride, or
+**Join as a Captain** to register a captain profile and go online.
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+## Project layout
 
-## Join the community
+- `src/app` — Expo Router routes (thin shells that render the matching screen
+  from `src/features`)
+- `src/features` — screens and their feature-local components, grouped by
+  flow (`auth`, `home`, `ride`, `captain`, `bookings`, `wallet`, `profile`, …)
+- `src/store` — Zustand stores (`ride-store`, `captain-store`, `auth-store`, …)
+- `src/components` — shared UI primitives, map, navigation chrome
+- `src/theme` — spacing/radius/elevation/motion tokens and the theme provider
+- `src/services` — mock data and the Nepal place-search client
 
-Join our community of developers creating universal apps.
+## Scripts
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+```bash
+npm run android   # expo start --android
+npm run ios       # expo start --ios
+npm run web       # expo start --web
+npm run lint      # expo lint
+```
