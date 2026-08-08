@@ -153,6 +153,7 @@ export function LoginScreenView() {
             onPress={() => toast('Password reset link sent to your number')}
             hitSlop={8}
             accessibilityRole="button"
+            accessibilityLabel="Forgot password?"
             style={styles.forgot}>
             <Text variant="bodySm" tone="brand">
               Forgot Password?

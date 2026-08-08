@@ -181,7 +181,7 @@ export function OtpScreenView() {
               </Text>
             </Text>
           ) : (
-            <Pressable onPress={resend} hitSlop={8} accessibilityRole="button">
+            <Pressable onPress={resend} hitSlop={8} accessibilityRole="button" accessibilityLabel="Resend code">
               <Text variant="body" tone="brand">
                 Resend code
               </Text>

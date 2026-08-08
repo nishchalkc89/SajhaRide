@@ -110,6 +110,7 @@ export function CaptainProfileScreenView() {
             router.replace('/(tabs)/home');
           }}
           accessibilityRole="button"
+          accessibilityLabel="Switch to passenger mode"
           style={[styles.switchBtn, { borderColor: theme.colors.border }]}>
           <Ionicons name="swap-horizontal" size={18} color={theme.colors.text} />
           <Text variant="label">Switch to Passenger</Text>

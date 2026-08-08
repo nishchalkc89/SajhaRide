@@ -153,6 +153,7 @@ function DesktopAppShell({ theme, pathname, children }: PropsWithChildren<{ them
           <Pressable
             onPress={() => router.replace((isCaptain ? '/home' : '/captain') as never)}
             accessibilityRole="button"
+            accessibilityLabel={isCaptain ? 'Switch to passenger mode' : 'Switch to captain mode'}
             style={[styles.switchBtn, { borderColor: theme.colors.border }]}>
             <Ionicons name="swap-horizontal" size={18} color={theme.colors.text} />
             <Text variant="label">{isCaptain ? 'Passenger Mode' : 'Captain Mode'}</Text>
