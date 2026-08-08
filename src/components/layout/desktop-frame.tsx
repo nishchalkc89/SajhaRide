@@ -308,11 +308,9 @@ const styles = StyleSheet.create({
     borderRadius: 44,
     borderWidth: 1,
     overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOpacity: 0.28,
-    shadowRadius: 56,
-    shadowOffset: { width: 0, height: 30 },
-    elevation: 24,
+    // This frame only ever renders on web (native takes the pass-through
+    // branch above), so boxShadow alone is enough — no shadow* needed.
+    boxShadow: '0px 30px 56px rgba(0, 0, 0, 0.28)',
   },
 
   // App shell
@@ -341,11 +339,8 @@ const styles = StyleSheet.create({
     borderRadius: 32,
     borderWidth: 1,
     overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOpacity: 0.12,
-    shadowRadius: 40,
-    shadowOffset: { width: 0, height: 18 },
-    elevation: 12,
+    // Web-only, same reasoning as the phone frame's boxShadow above.
+    boxShadow: '0px 18px 40px rgba(0, 0, 0, 0.12)',
   },
 
   // Marketing

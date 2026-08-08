@@ -1,5 +1,7 @@
 /** Spacing, radius and elevation primitives. 4pt base grid. */
 
+import { Platform } from 'react-native';
+
 export const spacing = {
   none: 0,
   xxs: 2,
@@ -32,58 +34,39 @@ export const radius = {
 export type ElevationLevel = 'none' | 'sm' | 'md' | 'lg' | 'sheet';
 
 /**
- * Cross-platform shadows. iOS reads shadow*, Android only reads elevation, so
- * both are always specified together.
+ * Cross-platform shadows. iOS reads shadow*, Android only reads elevation.
+ * React Native Web supports shadow* only for backwards compat and warns on
+ * every use, wanting the CSS-native `boxShadow` string instead — so web gets
+ * boxShadow and native gets shadow-prefixed props + elevation, never both on
+ * the same platform.
  */
-export const elevation: Record<
-  ElevationLevel,
-  {
-    shadowColor: string;
-    shadowOpacity: number;
-    shadowRadius: number;
-    shadowOffset: { width: number; height: number };
-    elevation: number;
+type ShadowSpec = { opacity: number; radius: number; offset: { width: number; height: number }; elevation: number };
+
+function buildShadow({ opacity, radius, offset, elevation: androidElevation }: ShadowSpec) {
+  if (Platform.OS === 'web') {
+    const shadow =
+      opacity === 0 ? 'none' : `${offset.width}px ${offset.height}px ${radius}px rgba(0, 0, 0, ${opacity})`;
+    return { boxShadow: shadow };
   }
-> = {
-  none: {
+  return {
     shadowColor: '#000',
-    shadowOpacity: 0,
-    shadowRadius: 0,
-    shadowOffset: { width: 0, height: 0 },
-    elevation: 0,
-  },
+    shadowOpacity: opacity,
+    shadowRadius: radius,
+    shadowOffset: offset,
+    elevation: androidElevation,
+  };
+}
+
+export const elevation: Record<ElevationLevel, ReturnType<typeof buildShadow>> = {
+  none: buildShadow({ opacity: 0, radius: 0, offset: { width: 0, height: 0 }, elevation: 0 }),
   /** Chips, small floating controls. */
-  sm: {
-    shadowColor: '#000',
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 2,
-  },
+  sm: buildShadow({ opacity: 0.06, radius: 8, offset: { width: 0, height: 2 }, elevation: 2 }),
   /** Cards resting on the canvas. */
-  md: {
-    shadowColor: '#000',
-    shadowOpacity: 0.08,
-    shadowRadius: 16,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 4,
-  },
+  md: buildShadow({ opacity: 0.08, radius: 16, offset: { width: 0, height: 4 }, elevation: 4 }),
   /** Map FABs, floating location cards. */
-  lg: {
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 24,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 8,
-  },
+  lg: buildShadow({ opacity: 0.1, radius: 24, offset: { width: 0, height: 8 }, elevation: 8 }),
   /** Bottom sheets — shadow casts upward. */
-  sheet: {
-    shadowColor: '#000',
-    shadowOpacity: 0.12,
-    shadowRadius: 28,
-    shadowOffset: { width: 0, height: -6 },
-    elevation: 16,
-  },
+  sheet: buildShadow({ opacity: 0.12, radius: 28, offset: { width: 0, height: -6 }, elevation: 16 }),
 };
 
 /** Standard control heights, measured from the mocks. */
