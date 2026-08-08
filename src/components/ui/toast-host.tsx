@@ -49,7 +49,7 @@ export function ToastHost() {
         : theme.colors.primary;
 
   return (
-    <View pointerEvents="box-none" style={[styles.wrap, { paddingBottom: insets.bottom + 90 }]}>
+    <View style={[styles.wrap, { paddingBottom: insets.bottom + 90 }]}>
       <Pressable
         onPress={hide}
         accessibilityRole="alert"
@@ -72,6 +72,8 @@ const styles = StyleSheet.create({
     bottom: 0,
     alignItems: 'center',
     paddingHorizontal: 20,
+    // Let touches pass through the empty area around the toast itself.
+    pointerEvents: 'box-none',
   },
   toast: {
     flexDirection: 'row',
