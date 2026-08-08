@@ -105,6 +105,7 @@ export function HomeScreenView() {
           </View>
           <MapControlButton
             icon="notifications-outline"
+            label="Notifications"
             onPress={() => toast('You have no new notifications')}
           />
         </View>
@@ -156,7 +157,7 @@ export function HomeScreenView() {
         <View style={[styles.mapWrap, { height: mapHeight, borderRadius: theme.radius.xl }]}>
           <RideMap pickup={pickup.coordinate} destination={destination?.coordinate} nearbyVehicles={NEARBY_VEHICLES}>
             <View style={styles.mapControls}>
-              <MapControlButton icon="locate" onPress={recenter} />
+              <MapControlButton icon="locate" label="Centre on my location" onPress={recenter} />
             </View>
             <View style={[styles.etaBadge, { backgroundColor: theme.colors.surface }, theme.elevation.md]}>
               <Text variant="caption" tone="secondary">

@@ -8,9 +8,12 @@ import { useTheme } from '@/theme';
 
 export function MapControlButton({
   icon,
+  label,
   onPress,
 }: {
   icon: keyof typeof Ionicons.glyphMap;
+  /** Screen-reader label — these buttons carry no visible text. */
+  label: string;
   onPress?: () => void;
 }) {
   const theme = useTheme();
@@ -18,6 +21,7 @@ export function MapControlButton({
   return (
     <Pressable
       accessibilityRole="button"
+      accessibilityLabel={label}
       onPress={() => {
         haptic('light');
         onPress?.();
