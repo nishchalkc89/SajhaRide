@@ -77,7 +77,7 @@ export function RideMap({
 
       {/* Live vehicle marker pinned to the map centre while navigating. */}
       {follow ? (
-        <View pointerEvents="none" style={styles.followMarkerWrap}>
+        <View style={[styles.followMarkerWrap, styles.noPointerEvents]}>
           <View style={[styles.followMarker, { backgroundColor: theme.colors.primary }]}>
             <Ionicons name="bicycle" size={20} color={theme.colors.onPrimary} />
           </View>
@@ -104,6 +104,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  // Decorative overlay — must never intercept map touches/clicks.
+  noPointerEvents: { pointerEvents: 'none' },
   followMarker: {
     width: 40,
     height: 40,
